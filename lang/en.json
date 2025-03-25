@@ -12,6 +12,7 @@
     "Invalid JSON was returned from the route.": "Invalid JSON was returned from the route.",
     "Location": "Location",
     "Login": "Login",
+    "Login with Google": "Login with Google",
     "Logout": "Logout",
     "Not Found": "Not Found",
     "of": "of",

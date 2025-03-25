@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Cohort\Pages\Login;
+use App\Filament\Socialite\Provider;
+use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -28,7 +31,7 @@ class CohortPanelProvider extends PanelProvider
             ->id('cohort')
             ->path('')
             ->spa()
-            ->login()
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -58,6 +61,16 @@ class CohortPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->plugins([
+                FilamentSocialitePlugin::make()
+                    ->providers([
+                        Provider::make('google')
+                            ->icon('google')
+                            ->resolveLabelUsing(fn() => __('Login with Google')),
+                    ])
+                    ->registration()
+                    ->showDivider(false),
             ]);
     }
 }

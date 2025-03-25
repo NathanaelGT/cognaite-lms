@@ -12,6 +12,7 @@
     "Invalid JSON was returned from the route.": "JSON yang tidak valid dikembalikan dari rute.",
     "Location": "Lokasi",
     "Login": "Masuk",
+    "Login with Google": "Masuk dengan Google",
     "Logout": "Keluar",
     "Not Found": "Tidak ditemukan",
     "of": "dari",
