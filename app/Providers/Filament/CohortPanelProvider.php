@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\Role;
 use App\Filament\Cohort\Pages\Login;
 use App\Filament\Socialite\Provider;
 use App\Models\User;
@@ -79,6 +80,7 @@ class CohortPanelProvider extends PanelProvider
                             'email' => $oauthUser->getEmail(),
                             'avatar_url' => $oauthUser->getAvatar(),
                         ])->forceFill([
+                            'role' => Role::Cohort,
                             'email_verified_at' => now(),
                         ]);
 
