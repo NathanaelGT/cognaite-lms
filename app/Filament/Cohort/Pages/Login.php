@@ -3,6 +3,7 @@
 namespace App\Filament\Cohort\Pages;
 
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
+use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;
 
 class Login extends SimplePage
@@ -14,4 +15,11 @@ class Login extends SimplePage
     protected ?string $heading = 'Cognaite Academy LMS';
 
     protected ?string $maxWidth = 'max-w-sm';
+
+    public function mount(): void
+    {
+        if (Filament::auth()->check()) {
+            redirect()->intended(Filament::getUrl());
+        }
+    }
 }
