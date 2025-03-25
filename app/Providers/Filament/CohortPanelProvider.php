@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Cohort\Pages\Login;
 use App\Filament\Socialite\Provider;
+use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -21,6 +22,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 
 class CohortPanelProvider extends PanelProvider
 {
@@ -70,7 +72,20 @@ class CohortPanelProvider extends PanelProvider
                             ->resolveLabelUsing(fn() => __('Login with Google')),
                     ])
                     ->registration()
-                    ->showDivider(false),
+                    ->showDivider(false)
+                    ->createUserUsing(static function (string $provider, SocialiteUserContract $oauthUser) {
+                        $user = new User([
+                            'name' => $oauthUser->getName(),
+                            'email' => $oauthUser->getEmail(),
+                            'avatar_url' => $oauthUser->getAvatar(),
+                        ])->forceFill([
+                            'email_verified_at' => now(),
+                        ]);
+
+                        $user->save();
+
+                        return $user;
+                    }),
             ]);
     }
 }
