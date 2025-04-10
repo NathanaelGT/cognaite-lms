@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Enums\Role;
 use App\Filament\Cohort\Pages\Login;
 use App\Filament\Socialite\Provider;
+use App\Http\Middleware\CohortOnly;
 use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use Filament\Enums\ThemeMode;
@@ -64,6 +65,7 @@ class CohortPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                CohortOnly::class,
             ])
             ->plugins([
                 FilamentSocialitePlugin::make()
