@@ -16,8 +16,8 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
+use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
 
 class BatchResource extends Resource
 {
@@ -39,14 +39,19 @@ class BatchResource extends Resource
                     TextInput::make('price')
                         ->label('Harga')
                         ->placeholder('Masukkan Harga')
-                        ->numeric()
-                        ->required(),
+                        ->prefix('Rp')
+                        ->mask(RawJs::make('$money($input, \',\', \'.\')'))
+                        ->dehydrateStateUsing(fn ($state) => (int) str()->replace('.', '', $state))
+                        ->maxValue(1_000_000_000),
 
                     TextInput::make('duration')
                         ->label('Durasi')
                         ->placeholder('Masukkan Durasi')
+                        ->suffix('Menit')
                         ->numeric()
-                        ->required(),
+                        ->required()
+                        ->minValue(1)
+                        ->maxValue(1_000_000_000),
                 ]),
 
                 RichEditor::make('description')
@@ -80,22 +85,22 @@ class BatchResource extends Resource
 
                 TextColumn::make('price')
                     ->label('Harga')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.') . ',-')
+                    ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') . ',-' : 'Gratis')
                     ->sortable(),
 
                 TextColumn::make('duration')
                     ->label('Durasi')
-                    ->suffix(' Jam')
+                    ->suffix(' Menit')
                     ->sortable(),
 
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
-                    ->dateTime()
+                    ->dateTime('j F Y \P\u\k\u\l H:i')
                     ->sortable(),
 
                 TextColumn::make('updated_at')
                     ->label('Terakhir Diperbarui')
-                    ->dateTime()
+                    ->dateTime('j F Y \P\u\k\u\l H:i')
                     ->sortable(),
             ])
             ->filters([
