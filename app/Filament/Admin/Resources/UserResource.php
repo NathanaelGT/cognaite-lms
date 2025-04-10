@@ -61,4 +61,9 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
         ];
     }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 }
