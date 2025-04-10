@@ -40,10 +40,11 @@ class PostsRelationManager extends RelationManager
                                 ->required()
                         ]),
                     ]),
-                    
+
                     Forms\Components\Wizard\Step::make('Detail')->schema([
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('min_score')
+                                ->columnSpanFull()
                                 ->label('Nilai Minimum')
                                 ->placeholder('Masukkan Nilai Minimum')
                                 ->numeric()
