@@ -18,7 +18,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-Users';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function table(Table $table): Table
     {
