@@ -61,4 +61,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
     {
         return $this->hasVerifiedEmail();
     }
+
+    public function batches()
+    {
+        return $this->belongsToMany(Batch::class, 'batch_user');
+    }
 }
