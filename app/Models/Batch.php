@@ -13,4 +13,10 @@ class Batch extends Model
         'description',
         'thumbnail',
     ];
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
 }

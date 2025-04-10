@@ -4,6 +4,8 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\BatchResource\Pages;
 use App\Filament\Admin\Resources\BatchResource\RelationManagers;
+use App\Filament\Admin\Resources\BatchResource\RelationManagers\MaterialRelationManager;
+use App\Filament\Admin\Resources\BatchResource\RelationManagers\SubmissionRelationManager;
 use App\Models\Batch;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -119,7 +121,8 @@ class BatchResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            MaterialRelationManager::class,
+            SubmissionRelationManager::class,
         ];
     }
 
