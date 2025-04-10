@@ -121,8 +121,7 @@ class BatchResource extends Resource
     public static function getRelations(): array
     {
         return [
-            MaterialRelationManager::class,
-            SubmissionRelationManager::class,
+            BatchResource\RelationManagers\PostsRelationManager::class,
         ];
     }
 
