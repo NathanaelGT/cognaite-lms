@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Batch extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'price',
+        'duration',
+        'description',
+        'thumbnail',
+    ];
 }
