@@ -18,7 +18,7 @@ use Filament\Forms\Components\Grid;
 class SubmissionRelationManager extends RelationManager
 {
     protected static string $relationship = 'posts';
-    protected static ?string $title = 'Submission';
+    protected static ?string $title = 'Tugas';
 
     public function form(Form $form): Form
     {
