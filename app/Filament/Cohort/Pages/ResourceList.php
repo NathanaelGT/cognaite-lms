@@ -14,59 +14,27 @@ class ResourceList extends Page
 
     public $batches;
     public $joinedBatchIds = [];
-
     public $confirmingBatchId = null;
-    public $batchToJoin = null;
-
-    public $detailBatchId = null;
 
     public function mount()
     {
-        $this->batches = Batch::with('courses')->get();
+        $this->batches = Batch::all();
         $this->joinedBatchIds = Auth::user()->batches->pluck('id')->toArray();
     }
 
-    public function startConfirmJoin($batchId)
+    public function joinBatch($batchId)
     {
-        $batch = Batch::findOrFail($batchId);
-
-        // Kalau batch gratis, tampilkan modal konfirmasi
-        if ($batch->price === '0' || $batch->price === null || strtolower($batch->price) === 'gratis') {
-            $this->confirmingBatchId = $batchId;
-            $this->batchToJoin = $batch;
-        } else {
-            // Kalau batch berbayar, redirect ke halaman payment dummy
-            redirect()->to(route('filament.cohort.pages.payment', ['batch' => $batch->id]));
-        }
-    }
-
-    public function confirmJoin()
-    {
-        $batch = Batch::findOrFail($this->confirmingBatchId);
         $user = Auth::user();
 
-        if (! $user->batches()->where('batch_id', $batch->id)->exists()) {
-            $user->batches()->attach($batch->id);
-            $this->joinedBatchIds[] = $batch->id;
+        if (!$user->batches->contains($batchId)) {
+            $user->batches()->attach($batchId);
 
             Notification::make()
-                ->title("Berhasil bergabung batch: {$batch->name}")
+                ->title('Berhasil bergabung batch!')
                 ->success()
                 ->send();
+
+            $this->joinedBatchIds[] = $batchId;
         }
-
-        $this->confirmingBatchId = null;
-        $this->batchToJoin = null;
-    }
-
-    public function cancelConfirm()
-    {
-        $this->confirmingBatchId = null;
-        $this->batchToJoin = null;
-    }
-
-    public function toggleDetail($batchId)
-    {
-        $this->expandedBatchId = $this->expandedBatchId === $batchId ? null : $batchId;
     }
 }

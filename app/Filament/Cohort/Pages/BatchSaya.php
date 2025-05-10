@@ -12,32 +12,32 @@ class BatchSaya extends Page
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static string $view = 'filament.cohort.pages.batch-saya';
 
-    public $batches = [];
-    public $expandedBatchId = null;
+    public $batches;
+    public $detailBatchId = null;
 
     public function mount()
     {
-        $this->batches = Auth::user()?->batches()->with('courses')->get() ?? [];
+        $this->batches = Auth::user()->batches()->with('posts')->get();
     }
 
     public function dropBatch($batchId)
     {
-        $user = Auth::user();
+        Auth::user()->batches()->detach($batchId);
+        $this->batches = Auth::user()->batches()->with('posts')->get();
 
-        if ($user->batches()->where('batch_id', $batchId)->exists()) {
-            $user->batches()->detach($batchId);
-
-            $this->batches = $user->batches()->with('courses')->get();
-
-            Notification::make()
-                ->title('Kamu telah keluar dari batch ini.')
-                ->success()
-                ->send();
-        }
+        Notification::make()
+            ->title('Kamu telah keluar dari batch.')
+            ->success()
+            ->send();
     }
 
-    public function toggleDetail($batchId)
+    public function showDetail($batchId)
     {
-        $this->expandedBatchId = $this->expandedBatchId === $batchId ? null : $batchId;
+        $this->detailBatchId = $batchId;
+    }
+
+    public function hideDetail()
+    {
+        $this->detailBatchId = null;
     }
 }
