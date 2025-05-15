@@ -20,6 +20,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 
 class BatchResource extends Resource
 {
@@ -80,6 +81,12 @@ class BatchResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('thumbnail')
+                    ->label('Thumbnail')
+                    ->url(fn ($record) => asset('storage/' . $record->thumbnail))
+                    ->height(80)
+                    ->width(80),
+
                 TextColumn::make('name')
                     ->label('Nama Batch')
                     ->sortable()
@@ -106,7 +113,12 @@ class BatchResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('kategori')
+                    ->options([
+                        'gratis' => 'Gratis',
+                        'berbayar' => 'Berbayar',
+                    ])
+                    ->label('Kategori'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

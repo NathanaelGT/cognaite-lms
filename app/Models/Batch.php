@@ -3,24 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Batch extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'price',
         'duration',
         'description',
         'thumbnail',
+        'kategori',
     ];
 
-    public function posts()
+    public function users(): BelongsToMany
     {
-        return $this->hasMany(Post::class); // Gantilah ini sesuai dengan model yang kamu gunakan
+        return $this->belongsToMany(User::class, 'batch_user');
     }
 
-    public function courses()
+    public function posts(): HasMany
     {
-        return $this->belongsToMany(Course::class);
+        return $this->hasMany(Post::class);
     }
+
 }

@@ -9,6 +9,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser, HasAvatar
@@ -62,8 +63,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
         return $this->hasVerifiedEmail();
     }
 
-    public function batches()
+    public function batches(): BelongsToMany
     {
-        return $this->belongsToMany(Batch::class, 'batch_user');
+        return $this->belongsToMany(Batch::class, 'batch_user')
+            ->withPivot('id')
+            ->select('batches.id', 'name', 'price', 'duration', 'description', 'thumbnail', 'kategori');
     }
 }
