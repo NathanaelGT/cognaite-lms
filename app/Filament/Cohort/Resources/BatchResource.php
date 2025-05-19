@@ -2,16 +2,22 @@
 
 namespace App\Filament\Cohort\Resources;
 
+use App\Enums\BatchUserStatus;
+use App\Enums\TransactionStatus;
+use App\Filament\Cohort\Pages\Pay;
 use App\Filament\Cohort\Resources\BatchResource\Pages;
 use App\Models\Batch;
+use App\Models\Transaction;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Filament\Tables;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class BatchResource extends Resource
 {
@@ -58,23 +64,37 @@ class BatchResource extends Resource
                     ->icon('heroicon-o-plus')
                     ->requiresConfirmation()
                     ->color('success')
-                    ->action(function (Batch $record) {
+                    ->action(function (Batch $record, Pages\ListBatchResource $livewire) {
                         $user = Auth::user();
 
-                        if (!$user->batches->contains($record->id)) {
-                            $user->batches()->attach($record->id);
-
-                            \Filament\Notifications\Notification::make()
-                                ->title('Berhasil')
-                                ->body('Berhasil bergabung ke batch: ' . $record->name)
-                                ->success()
-                                ->send();
-                        } else {
-                            \Filament\Notifications\Notification::make()
+                        if ($user->batches()->where('batches.id', $record->id)->exists()) {
+                            Notifications\Notification::make()
                                 ->title('Peringatan')
                                 ->body('Kamu sudah tergabung di batch ini.')
                                 ->warning()
                                 ->send();
+
+                            return;
+                        }
+
+                        if ($record->price === 0) {
+                            $user->batches()->attach($record->id);
+
+                            $livewire->redirect(MyBatchResource::getUrl('view', [$record]));
+                        } else {
+                            $transaction = $user->transactions()
+                                ->where('batch_id', $record->id)
+                                ->firstOr(callback: function () use ($user, $record) {
+                                    return $user->transactions()->create([
+                                        'id' => $id = Str::uuid7()->toString(),
+                                        'batch_id' => $record->id,
+                                        'price' => $record->price,
+                                        'status' => TransactionStatus::Pending,
+                                        'snap_token' => Transaction::getSnapToken($id, $record),
+                                    ]);
+                                });
+
+                            $livewire->redirectRoute('pay', [$transaction]);
                         }
                     }),
                 Tables\Actions\ViewAction::make('detail')

@@ -24,7 +24,12 @@ class Batch extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'batch_user');
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     public function posts(): HasMany
