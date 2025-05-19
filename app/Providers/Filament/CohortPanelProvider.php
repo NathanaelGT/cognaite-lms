@@ -42,6 +42,7 @@ class CohortPanelProvider extends PanelProvider
             ->defaultThemeMode(ThemeMode::Light)
             ->favicon(asset('img/logo.svg'))
             ->brandName('Cognaite LMS')
+            ->topNavigation()
             ->discoverResources(in: app_path('Filament/Cohort/Resources'), for: 'App\\Filament\\Cohort\\Resources')
             ->discoverPages(in: app_path('Filament/Cohort/Pages'), for: 'App\\Filament\\Cohort\\Pages')
             ->pages([

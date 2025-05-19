@@ -5,6 +5,9 @@ namespace App\Filament\Cohort\Resources\BatchResource\Pages;
 use App\Filament\Cohort\Resources\BatchResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class ViewBatchResource extends ViewRecord
 {
@@ -15,12 +18,13 @@ class ViewBatchResource extends ViewRecord
         return [];
     }
 
-    protected function getViewContent(): array
+    public function getBreadcrumb(): string
     {
-        return [
-            Infolists\Components\Infolist::make()
-                ->schema($this->getResource()::infolist(new Infolists\Infolist()))
-                ->record($this->getRecord())
-        ];
+        return '';
+    }
+
+    public function getTitle(): string | Htmlable
+    {
+        return '';
     }
 }
