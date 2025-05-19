@@ -113,6 +113,20 @@ class BatchResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('price')
+                    ->label('Jenis')
+                    ->modifyQueryUsing(function (Builder $query, $state) {
+                        $operator = match ($state['value']) {
+                            'g' => '=',
+                            'b' => '!=',
+                            default => null,
+                        };
+
+                        if ($operator) {
+                            $query->where('price', $operator, 0);
+                        }
+                    })
+                    ->options(['g' => 'Gratis', 'b' => 'Berbayar']),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

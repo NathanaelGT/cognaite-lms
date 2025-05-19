@@ -2,6 +2,7 @@
 
 namespace App\Filament\Cohort\Resources;
 
+use App\Filament\Cohort\Resources\BatchResource\Pages;
 use App\Models\Batch;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
@@ -9,7 +10,7 @@ use Filament\Tables\Table;
 use Filament\Tables;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
-use App\Filament\Cohort\Resources\BatchResource\Pages;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class BatchResource extends Resource
@@ -22,7 +23,6 @@ class BatchResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(Batch::query())
             ->columns([
                 Tables\Columns\ImageColumn::make('thumbnail')
                     ->disk('public')
@@ -37,6 +37,20 @@ class BatchResource extends Resource
                 Tables\Columns\TextColumn::make('duration')->label('Durasi')->suffix(' Menit'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('price')
+                    ->label('Jenis')
+                    ->modifyQueryUsing(function (Builder $query, $state) {
+                        $operator = match ($state['value']) {
+                            'g' => '=',
+                            'b' => '!=',
+                            default => null,
+                        };
+
+                        if ($operator) {
+                            $query->where('price', $operator, 0);
+                        }
+                    })
+                    ->options(['g' => 'Gratis', 'b' => 'Berbayar']),
             ])
             ->actions([
                 Action::make('gabung')
@@ -67,18 +81,28 @@ class BatchResource extends Resource
                     ->label('Detail')
                     ->icon('heroicon-o-eye'),
             ])
-            ->paginated();
+            ->paginated()
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereDoesntHave('users', function (Builder $query) {
+                    $query->where('user_id', Auth::id());
+                });
+            });
     }
 
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->schema([
-                Infolists\Components\TextEntry::make('name')->label('Nama Batch'),
+                Infolists\Components\TextEntry::make('name')
+                    ->label('Nama Batch'),
+
                 Infolists\Components\TextEntry::make('price')
                     ->label('Harga')
                     ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),
-                Infolists\Components\TextEntry::make('duration')->label('Durasi (Menit)'),
+
+                Infolists\Components\TextEntry::make('duration')
+                    ->label('Durasi (Menit)'),
+
                 Infolists\Components\ImageEntry::make('thumbnail')
                     ->label('Thumbnail')
                     ->width(300)
