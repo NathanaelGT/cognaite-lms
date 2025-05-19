@@ -37,7 +37,6 @@ class MyBatchResource extends Resource
                     ->height(60)
                     ->width(60),
                 Tables\Columns\TextColumn::make('name')->label('Nama')->searchable(),
-                Tables\Columns\TextColumn::make('kategori')->label('Kategori'),
                 Tables\Columns\TextColumn::make('price')->label('Harga')
                     ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),
                 Tables\Columns\TextColumn::make('duration')->label('Durasi (Menit)'),
@@ -69,7 +68,6 @@ class MyBatchResource extends Resource
         return $infolist
             ->schema([
                 TextEntry::make('name')->label('Nama Batch'),
-                TextEntry::make('kategori')->label('Kategori'),
                 TextEntry::make('price')
                     ->label('Harga')
                     ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),

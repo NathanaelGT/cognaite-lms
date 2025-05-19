@@ -113,12 +113,6 @@ class BatchResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('kategori')
-                    ->options([
-                        'gratis' => 'Gratis',
-                        'berbayar' => 'Berbayar',
-                    ])
-                    ->label('Kategori'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

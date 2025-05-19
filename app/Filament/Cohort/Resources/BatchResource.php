@@ -31,18 +31,12 @@ class BatchResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Batch')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('kategori')->label('Kategori'),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
                     ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),
                 Tables\Columns\TextColumn::make('duration')->label('Durasi')->suffix(' Menit'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('kategori')
-                    ->options([
-                        'gratis' => 'Gratis',
-                        'berbayar' => 'Berbayar',
-                    ]),
             ])
             ->actions([
                 Action::make('gabung')
@@ -81,7 +75,6 @@ class BatchResource extends Resource
         return $infolist
             ->schema([
                 Infolists\Components\TextEntry::make('name')->label('Nama Batch'),
-                Infolists\Components\TextEntry::make('kategori')->label('Kategori'),
                 Infolists\Components\TextEntry::make('price')
                     ->label('Harga')
                     ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),

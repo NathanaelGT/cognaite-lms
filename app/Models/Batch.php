@@ -17,7 +17,6 @@ class Batch extends Model
         'duration',
         'description',
         'thumbnail',
-        'kategori',
     ];
 
     public function users(): BelongsToMany

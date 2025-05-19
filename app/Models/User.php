@@ -67,6 +67,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
     {
         return $this->belongsToMany(Batch::class, 'batch_user')
             ->withPivot('id')
-            ->select('batches.id', 'name', 'price', 'duration', 'description', 'thumbnail', 'kategori');
+            ->select('batches.id', 'name', 'price', 'duration', 'description', 'thumbnail');
     }
 }

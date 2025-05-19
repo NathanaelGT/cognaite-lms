@@ -24,7 +24,6 @@ class ViewMyBatch extends ViewRecord
                 ->record($record)
                 ->schema([
                     TextEntry::make('name')->label('Nama Batch'),
-                    TextEntry::make('kategori')->label('Kategori'),
                     TextEntry::make('price')
                         ->label('Harga')
                         ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),
