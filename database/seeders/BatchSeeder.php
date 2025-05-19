@@ -275,11 +275,11 @@ class BatchSeeder extends Seeder
         $this->batches[] = [
             'id' => $id,
             'name' => $name,
-            'slug' => str()->slug($name),
+            'slug' => $slug = str()->slug($name),
             'price' => $price,
             'duration' => $duration,
             'description' => "<p>Batch ini membahas tentang $name</p>",
-            'thumbnail' => 'thumbnails/_.png',
+            'thumbnail' => "thumbnails/batch/$slug.png",
             'created_at' => (string) $timestamp,
             'updated_at' => (string) $timestamp,
         ];
