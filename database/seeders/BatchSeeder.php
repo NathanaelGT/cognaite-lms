@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Post;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class BatchSeeder extends Seeder
 {
@@ -279,7 +280,7 @@ class BatchSeeder extends Seeder
             'price' => $price,
             'duration' => $duration,
             'description' => "<p>Batch ini membahas tentang $name</p>",
-            'thumbnail' => "thumbnails/batch/$slug.png",
+            'thumbnail' => $thumbnail = "thumbnails/batch/$slug.png",
             'created_at' => (string) $timestamp,
             'updated_at' => (string) $timestamp,
         ];
@@ -304,6 +305,11 @@ class BatchSeeder extends Seeder
 
             $this->posts[] = $post;
         }
+
+        copy(
+            storage_path("seeder/$thumbnail"),
+            Storage::disk('public')->path($thumbnail),
+        );
     }
 
     protected function post(string $title, string $description, int $min_score): array
