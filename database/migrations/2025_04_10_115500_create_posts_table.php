@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Batch;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,12 +14,15 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('batch_id')->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Batch::class)->constrained()->cascadeOnDelete();
             $table->unsignedinteger('order');
             $table->string('title');
+            $table->string('slug');
             $table->text('description');
             $table->unsignedinteger('min_score')->nullable();
             $table->timestamps();
+
+            $table->unique(['batch_id', 'slug']);
         });
     }
 

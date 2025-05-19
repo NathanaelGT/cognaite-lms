@@ -263,23 +263,45 @@ class BatchSeeder extends Seeder
 
     protected function addBatch(string $name, int $price, int $duration, array $posts): void
     {
+        $id = count($this->batches) + 1;
+        $timestamp = now()
+            ->toMutable()
+            ->subMonths(16)
+            ->setMonth($id)
+            ->setHour(0)
+            ->setMinute(0)
+            ->setSeconds(fake()->randomFloat(0, 32400, 61200));
+
         $this->batches[] = [
-            'id' => $id = count($this->batches) + 1,
+            'id' => $id,
             'name' => $name,
+            'slug' => str()->slug($name),
             'price' => $price,
             'duration' => $duration,
             'description' => "<p>Batch ini membahas tentang $name</p>",
             'thumbnail' => 'thumbnails/_.png',
+            'created_at' => (string) $timestamp,
+            'updated_at' => (string) $timestamp,
         ];
 
         $iteration = 1;
         foreach ($posts as &$post) {
             $post['batch_id'] = $id;
             $post['order'] = $iteration++;
+            $post['slug'] = str()->slug($post['title']);
         }
         unset($post);
 
         foreach (Arr::shuffle($posts) as $post) {
+            $timestamp
+                ->addDays(fake()->randomFloat(0, 1, 3))
+                ->setHour(0)
+                ->setMinute(0)
+                ->setSeconds(fake()->randomFloat(0, 32400, 61200));
+
+            $post['created_at'] = (string) $timestamp;
+            $post['updated_at'] = (string) $timestamp;
+
             $this->posts[] = $post;
         }
     }

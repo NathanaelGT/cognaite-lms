@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Post extends Model
 {
     use HasFactory;
+    use HasSlug;
 
     protected $fillable = [
         'batch_id',
@@ -44,5 +47,18 @@ class Post extends Model
                     $item->update(['order' => $item->order - 1]);
                 });
         });
+    }
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug')
+            ->extraScope(fn ($builder) => $builder->where('batch_id', $this->batch_id));
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }
