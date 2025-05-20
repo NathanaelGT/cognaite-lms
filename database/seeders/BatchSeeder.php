@@ -16,6 +16,8 @@ class BatchSeeder extends Seeder
 
     public function run(): void
     {
+        Storage::disk('public')->makeDirectory("thumbnails/batch");
+
         $this->addBatch(
             name: 'Algoritma dan Struktur Data',
             price: 0,
