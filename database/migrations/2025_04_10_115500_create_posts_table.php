@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug');
             $table->text('description');
+            $table->text('content');
             $table->unsignedinteger('min_score')->nullable();
             $table->timestamps();
 

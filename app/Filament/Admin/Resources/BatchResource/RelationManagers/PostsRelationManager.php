@@ -58,6 +58,12 @@ class PostsRelationManager extends RelationManager
                                 ->placeholder('Masukkan Deskripsi')
                                 ->required()
                                 ->columnSpanFull(),
+
+                            Forms\Components\RichEditor::make('content')
+                                ->label('Konten')
+                                ->placeholder('Masukkan Konten')
+                                ->required()
+                                ->columnSpanFull(),
                         ]),
                     ]),
                 ])->columnSpanFull()

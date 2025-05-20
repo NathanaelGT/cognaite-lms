@@ -18,6 +18,7 @@ class Post extends Model
         'batch_id',
         'title',
         'description',
+        'content',
         'min_score',
         'order',
     ];
