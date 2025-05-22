@@ -5,6 +5,7 @@ namespace App\Filament\Cohort\Resources;
 use App\Enums\BatchUserStatus;
 use App\Enums\TransactionStatus;
 use App\Filament\Cohort\Pages\Pay;
+use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Filament\Cohort\Resources\BatchResource\Pages;
 use App\Filament\Cohort\Resources\BatchResource\RelationManagers;
 use App\Models\Batch;
@@ -119,6 +120,11 @@ class BatchResource extends Resource
 
                         if ($record->price === 0) {
                             $user->batches()->attach($record->id);
+
+                            activity()
+                                ->causedBy($user)
+                                ->performedOn($record)
+                                ->log('Join batch');
 
                             $livewire->redirect(MyBatchResource::getUrl('view', [$record]));
                         } else {

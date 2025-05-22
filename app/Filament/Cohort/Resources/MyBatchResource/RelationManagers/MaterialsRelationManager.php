@@ -21,7 +21,6 @@ class MaterialsRelationManager extends RelationManager
                 $query->whereNull('min_score')
                     ->selectRaw('*, ROW_NUMBER() OVER (ORDER BY `order`) AS `order`');
             })
-            ->reorderable('order')
             ->defaultSort('order')
             ->recordTitleAttribute('title')
             ->columns([
@@ -32,18 +31,6 @@ class MaterialsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Dibuat Pada')
-                    ->dateTime('j F Y \P\u\k\u\l H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Terakhir Diperbarui')
-                    ->dateTime('j F Y \P\u\k\u\l H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
