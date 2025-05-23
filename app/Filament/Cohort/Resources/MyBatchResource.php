@@ -121,6 +121,7 @@ class MyBatchResource extends Resource
         return [
             'index' => Pages\ListMyBatches::route('/'),
             'view' => Pages\ViewMyBatch::route('/{record}'),
+            'learn-material'  => Pages\LearnMaterial::route('/{record}/materi/{post}'),
         ];
     }
 
