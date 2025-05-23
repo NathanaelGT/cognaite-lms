@@ -50,14 +50,19 @@ class LearnMaterial extends ViewRecord
                     ->size(TextEntrySize::Large)
                     ->markdown(),
                 InfolistActions::make([
-                    Action::make('finish')
-                        ->label('Selesai')
-                        ->icon('heroicon-o-check')
-                        ->url(MyBatchResource::getUrl('view', [
-                            'record' => $this->record->slug
-                        ]))
-                        ->color('success')
-                        ->visible(fn () => !$this->getNextPost()),
+                    Action::make('prev')
+                        ->label('Sebelumnya')
+                        ->icon('heroicon-o-arrow-left')
+                        ->url(function () {
+                            $previousPost = $this->getPreviousPost();
+                            return $previousPost ? MyBatchResource::getUrl('learn-material', [
+                                'record' => $this->record->slug,
+                                'post' => $previousPost->slug,
+                            ]) : null;
+                        })
+                        ->disabled(fn () => !$this->getPreviousPost())
+                        ->color('primary')
+                        ->visible(fn () => (bool) $this->getPreviousPost()),
 
                     Action::make('next')
                         ->icon('heroicon-o-arrow-right')
@@ -74,21 +79,16 @@ class LearnMaterial extends ViewRecord
                         ->color('primary')
                         ->visible(fn () => (bool) $this->getNextPost()),
 
-                    Action::make('prev')
-                        ->label('Sebelumnya')
-                        ->icon('heroicon-o-arrow-left')
-                        ->url(function () {
-                            $previousPost = $this->getPreviousPost();
-                            return $previousPost ? MyBatchResource::getUrl('learn-material', [
-                                'record' => $this->record->slug,
-                                'post' => $previousPost->slug,
-                            ]) : null;
-                        })
-                        ->disabled(fn () => !$this->getPreviousPost())
-                        ->color('primary')
-                        ->visible(fn () => (bool) $this->getPreviousPost()),
+                    Action::make('finish')
+                        ->label('Selesai')
+                        ->icon('heroicon-o-check')
+                        ->url(MyBatchResource::getUrl('view', [
+                            'record' => $this->record->slug
+                        ]))
+                        ->color('success')
+                        ->visible(fn () => !$this->getNextPost()),
                 ])
-                    ->alignRight()
+                    ->alignBetween()
                     ->columnSpanFull(),
             ]);
     }
