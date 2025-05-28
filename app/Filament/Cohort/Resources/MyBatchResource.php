@@ -54,20 +54,14 @@ class MyBatchResource extends Resource
                 Tables\Actions\ViewAction::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-o-eye'),
-                Action::make('keluar')
-                    ->label('Keluar')
-                    ->icon('heroicon-o-x-circle')
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->action(function (Batch $record) use ($user) {
-                        $user->batches()->detach($record->id);
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Berhasil')
-                            ->body('Berhasil keluar dari Batch ' . $record->name)
-                            ->success()
-                            ->send();
-                    }),
+                Action::make('learn')
+                    ->label('Belajar Sekarang')
+                    ->icon('heroicon-o-book-open')
+                    ->url(fn (Batch $record) => MyBatchResource::getUrl('learn-material', [
+                        'record' => $record->slug,
+                        'post'   => optional($record->posts()->orderBy('order')->first())->slug,
+                    ]))
+                    ->visible(fn (Batch $record) => $record->posts()->exists()),
             ])
             ->paginated();
     }
