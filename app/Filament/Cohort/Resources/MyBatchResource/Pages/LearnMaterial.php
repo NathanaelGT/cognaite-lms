@@ -19,6 +19,7 @@ use Filament\Infolists\Components\Actions as InfolistActions;
 class LearnMaterial extends ViewRecord
 {
     protected static string $resource = MyBatchResource::class;
+    protected static string $view = 'filament.cohort.my-batch-resource.pages.learn-material';
 
     public Post $post;
 
@@ -48,6 +49,7 @@ class LearnMaterial extends ViewRecord
                     ->hiddenLabel()
                     ->columnSpanFull()
                     ->size(TextEntrySize::Large)
+                    ->alignJustify('center')
                     ->markdown(),
                 InfolistActions::make([
                     Action::make('prev')
@@ -61,8 +63,7 @@ class LearnMaterial extends ViewRecord
                             ]) : null;
                         })
                         ->disabled(fn () => !$this->getPreviousPost())
-                        ->color('primary')
-                        ->visible(fn () => (bool) $this->getPreviousPost()),
+                        ->color('primary'),
 
                     Action::make('next')
                         ->icon('heroicon-o-arrow-right')
@@ -86,7 +87,22 @@ class LearnMaterial extends ViewRecord
                             'record' => $this->record->slug
                         ]))
                         ->color('success')
-                        ->visible(fn () => !$this->getNextPost()),
+                        ->visible(fn () => !$this->getNextPost())
+                        ->action(function () {
+                            $progress = \App\Models\BatchUserProgress::updateOrCreate(
+                                [
+                                    'user_id' => Auth::id(),
+                                    'batch_id' => $this->record->id,
+                                ],
+                                [
+                                    'completed_posts' => $this->record->posts()->count(),
+                                ]
+                            );
+
+                            return redirect(MyBatchResource::getUrl('view', [
+                                'record' => $this->record->slug,
+                            ]));
+                        }),
                 ])
                     ->alignBetween()
                     ->columnSpanFull(),
