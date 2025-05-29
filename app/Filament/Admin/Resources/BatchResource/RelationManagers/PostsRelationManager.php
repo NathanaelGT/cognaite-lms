@@ -11,6 +11,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Question;
+use App\Models\Answer;
+use Illuminate\Support\Facades\DB;
 
 class PostsRelationManager extends RelationManager
 {
@@ -34,8 +37,11 @@ class PostsRelationManager extends RelationManager
                                 ->label('Jenis')
                                 ->options([
                                     'material' => 'Materi',
-                                    'submission' => 'Tugas',
+                                    'submission' => 'Submission',
+                                    'quiz' => 'Quiz',
+
                                 ])
+                                ->default('material')
                                 ->searchable()
                                 ->required()
                         ]),
@@ -48,7 +54,7 @@ class PostsRelationManager extends RelationManager
                                 ->label('Nilai Minimum')
                                 ->placeholder('Masukkan Nilai Minimum')
                                 ->numeric()
-                                ->visible(fn (Get $get) => $get('type') === 'submission')
+                                ->visible(fn (Get $get) => $get('type') === 'submission' or $get('type') === 'quiz')
                                 ->required()
                                 ->minValue(0)
                                 ->maxValue(100),
@@ -64,6 +70,38 @@ class PostsRelationManager extends RelationManager
                                 ->placeholder('Masukkan Konten')
                                 ->required()
                                 ->columnSpanFull(),
+
+                            Forms\Components\Repeater::make('questions')
+                                ->label('Pilihan Ganda')
+                                ->visible(fn (Get $get) => $get('type') === 'quiz')
+                                ->relationship('questions')
+                                ->schema([
+                                    Forms\Components\TextInput::make('content')
+                                        ->label('Soal')
+                                        ->required()
+                                        ->columnSpanFull(),
+
+                                    Forms\Components\Repeater::make('answers')
+                                        ->label('Pilihan Jawaban')
+                                        ->relationship('answers')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('content')
+                                                ->label('Jawaban')
+                                                ->required(),
+
+                                            Forms\Components\Radio::make('is_correct')
+                                                ->label('Apakah ini jawaban benar?')
+                                                ->boolean()
+                                                ->default(false),
+                                        ])
+                                        ->minItems(2)
+                                        ->columns(2)
+                                        ->required(),
+
+                                ])
+                                ->grid(1)
+                                ->columnSpanFull()
+                                ->itemLabel(fn (array $state): ?string => $state['question'] ?? null)
                         ]),
                     ]),
                 ])->columnSpanFull()
@@ -85,9 +123,16 @@ class PostsRelationManager extends RelationManager
                     ->label('Judul')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('id')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Jenis')
-                    ->formatStateUsing(fn (Post $post) => $post->min_score === null ? 'Materi' : 'Tugas')
+                    ->formatStateUsing(function (string $state) {
+                        return match ($state) {
+                            'material' => 'Materi',
+                            'submission' => 'Submission',
+                            'quiz' => 'Quiz',
+                            default => 'Tidak diketahui',
+                        };
+                    })
                     ->badge()
                     ->toggleable(),
 
@@ -112,10 +157,33 @@ class PostsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->after(function (Post $record, array $data) {
+                        if ($record->type === 'quiz' && isset($data['questions'])) {
+                            foreach ($data['questions'] as $questionData) {
+                                $answers = $questionData['answers'] ?? [];
+                                unset($questionData['answers']);
+
+                                $question = $record->questions()->create($questionData);
+                                $question->answers()->createMany($answers);
+                            }
+                        }
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->after(function (Post $record, array $data) {
+                        if ($record->type === 'quiz') {
+
+                            foreach ($data['questions'] ?? [] as $questionData) {
+                                $answers = $questionData['answers'] ?? [];
+                                unset($questionData['answers']);
+
+                                $question = $record->questions()->create($questionData);
+                                $question->answers()->createMany($answers);
+                            }
+                        }
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

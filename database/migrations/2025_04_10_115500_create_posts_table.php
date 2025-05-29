@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('description');
             $table->text('content');
             $table->unsignedinteger('min_score')->nullable();
+            $table->string('type');
             $table->timestamps();
 
             $table->unique(['batch_id', 'slug']);
