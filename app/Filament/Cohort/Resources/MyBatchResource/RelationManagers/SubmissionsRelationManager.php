@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class SubmissionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'posts';
-    protected static ?string $title = 'Submission';
+    protected static ?string $title = 'Tugas';
 
     public function table(Table $table): Table
     {
