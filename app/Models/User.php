@@ -80,4 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
     {
         return LogOptions::defaults()->logOnly(['name', 'email']);
     }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

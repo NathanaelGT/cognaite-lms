@@ -22,6 +22,7 @@ class Post extends Model
         'min_score',
         'order',
         'type',
+        'submission_file',
     ];
 
     public function batch(): BelongsTo
@@ -67,5 +68,10 @@ class Post extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class);
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Question;
 use App\Models\Answer;
+use App\Models\Submission;
 use Illuminate\Support\Facades\DB;
 
 class PostsRelationManager extends RelationManager
@@ -39,7 +40,6 @@ class PostsRelationManager extends RelationManager
                                     'material' => 'Materi',
                                     'submission' => 'Submission',
                                     'quiz' => 'Quiz',
-
                                 ])
                                 ->default('material')
                                 ->searchable()
@@ -54,7 +54,7 @@ class PostsRelationManager extends RelationManager
                                 ->label('Nilai Minimum')
                                 ->placeholder('Masukkan Nilai Minimum')
                                 ->numeric()
-                                ->visible(fn (Get $get) => $get('type') === 'submission' or $get('type') === 'quiz')
+                                ->visible(fn (Get $get) => in_array($get('type'), ['submission', 'quiz']))
                                 ->required()
                                 ->minValue(0)
                                 ->maxValue(100),
@@ -69,6 +69,17 @@ class PostsRelationManager extends RelationManager
                                 ->label('Konten')
                                 ->placeholder('Masukkan Konten')
                                 ->required()
+                                ->columnSpanFull(),
+
+                            Forms\Components\FileUpload::make('submission_file')
+                                ->label('Upload Template Submission')
+                                ->visible(fn (Get $get) => $get('type') === 'submission')
+                                ->disk('public')
+                                ->directory('submissions/templates')
+                                ->downloadable()
+                                ->openable()
+                                ->preserveFilenames()
+                                ->required(fn (Get $get) => $get('type') === 'submission')
                                 ->columnSpanFull(),
 
                             Forms\Components\Repeater::make('questions')
@@ -97,7 +108,6 @@ class PostsRelationManager extends RelationManager
                                         ->minItems(2)
                                         ->columns(2)
                                         ->required(),
-
                                 ])
                                 ->grid(1)
                                 ->columnSpanFull()
@@ -107,6 +117,7 @@ class PostsRelationManager extends RelationManager
                 ])->columnSpanFull()
             ]);
     }
+
 
     public function table(Table $table): Table
     {
