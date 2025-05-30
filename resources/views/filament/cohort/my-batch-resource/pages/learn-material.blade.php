@@ -5,6 +5,8 @@
         'fi-resource-record-' . $record->getKey(),
     ])
 >
+    {{ $this->infolist }}
+
     <div x-data="{ open: false }" class="relative">
         <!-- Toggle Button -->
         <button
@@ -94,17 +96,6 @@
                     {{ $item->title }}
                 </a>
             @endforeach
-        </div>
-
-        <!-- Main content -->
-        <div>
-            @if ($this->hasInfolist())
-                {{ $this->infolist }}
-            @else
-                <div wire:key="{{ $this->getId() }}.forms.{{ $this->getFormStatePath() }}">
-                    {{ $this->form }}
-                </div>
-            @endif
         </div>
     </div>
 </x-filament-panels::page>

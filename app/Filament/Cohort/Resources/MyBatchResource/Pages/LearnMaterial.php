@@ -16,12 +16,19 @@ use Filament\Actions;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Actions as InfolistActions;
 
-class LearnMaterial extends ViewRecord
+class LearnMaterial extends Page
 {
     protected static string $resource = MyBatchResource::class;
     protected static string $view = 'filament.cohort.my-batch-resource.pages.learn-material';
 
     public Post $post;
+    public Batch $record;
+
+    public function mount(Batch $record, Post $post): void
+    {
+        $this->record = $record;
+        $this->post = $post;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -45,22 +52,31 @@ class LearnMaterial extends ViewRecord
                     ->hiddenLabel()
                     ->weight(FontWeight::Bold)
                     ->size(TextEntrySize::Large),
+
                 TextEntry::make('content')
                     ->hiddenLabel()
                     ->columnSpanFull()
                     ->size(TextEntrySize::Large)
                     ->alignJustify('center')
                     ->markdown(),
+
                 InfolistActions::make([
                     Action::make('prev')
                         ->label('Sebelumnya')
                         ->icon('heroicon-o-arrow-left')
                         ->url(function () {
-                            $previousPost = $this->getPreviousPost();
-                            return $previousPost ? MyBatchResource::getUrl('learn-material', [
-                                'record' => $this->record->slug,
-                                'post' => $previousPost->slug,
-                            ]) : null;
+                            $prevPost = $this->getPreviousPost();
+                            if (!$prevPost) return null;
+
+                            return $prevPost->type === 'quiz'
+                                ? MyBatchResource::getUrl('quiz', [
+                                    'record' => $this->record->slug,
+                                    'post' => $prevPost->slug,
+                                ])
+                                : MyBatchResource::getUrl('learn-material', [
+                                    'record' => $this->record->slug,
+                                    'post' => $prevPost->slug,
+                                ]);
                         })
                         ->disabled(fn () => !$this->getPreviousPost())
                         ->color('primary'),
@@ -71,10 +87,17 @@ class LearnMaterial extends ViewRecord
                         ->iconPosition('after')
                         ->url(function () {
                             $nextPost = $this->getNextPost();
-                            return $nextPost ? MyBatchResource::getUrl('learn-material', [
-                                'record' => $this->record->slug,
-                                'post' => $nextPost->slug,
-                            ]) : null;
+                            if (!$nextPost) return null;
+
+                            return $nextPost->type === 'quiz'
+                                ? MyBatchResource::getUrl('quiz', [
+                                    'record' => $this->record->slug,
+                                    'post' => $nextPost->slug,
+                                ])
+                                : MyBatchResource::getUrl('learn-material', [
+                                    'record' => $this->record->slug,
+                                    'post' => $nextPost->slug,
+                                ]);
                         })
                         ->disabled(fn () => !$this->getNextPost())
                         ->color('primary')
@@ -87,22 +110,7 @@ class LearnMaterial extends ViewRecord
                             'record' => $this->record->slug
                         ]))
                         ->color('success')
-                        ->visible(fn () => !$this->getNextPost())
-                        ->action(function () {
-                            $progress = \App\Models\BatchUserProgress::updateOrCreate(
-                                [
-                                    'user_id' => Auth::id(),
-                                    'batch_id' => $this->record->id,
-                                ],
-                                [
-                                    'completed_posts' => $this->record->posts()->count(),
-                                ]
-                            );
-
-                            return redirect(MyBatchResource::getUrl('view', [
-                                'record' => $this->record->slug,
-                            ]));
-                        }),
+                        ->visible(fn () => !$this->getNextPost()),
                 ])
                     ->alignBetween()
                     ->columnSpanFull(),
@@ -123,10 +131,5 @@ class LearnMaterial extends ViewRecord
             ->where('order', '>', $this->post->order)
             ->orderBy('order', 'asc')
             ->first();
-    }
-
-    public function getRelationManagers(): array
-    {
-        return [];
     }
 }
