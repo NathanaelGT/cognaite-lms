@@ -176,10 +176,13 @@ class Quiz extends Page
 
     public function getFormActions(): array
     {
-        $passed = QuizResult::where('user_id', Auth::id())
+        $latestQuizResult = QuizResult::where('user_id', Auth::id())
             ->where('post_id', $this->post->id)
             ->latest()
-            ->first()?->passed ?? false;
+            ->first();
+
+        $passedForFormActions = $this->passed ?? ($latestQuizResult->passed ?? false);
+        $hasNextPost = (bool) $this->getNextPost(); // Check if there's a next post
 
         return [
             FormAction::make('previous')
@@ -206,7 +209,7 @@ class Quiz extends Page
                 ->label('Ulangi Quiz')
                 ->icon('heroicon-o-arrow-path')
                 ->color('danger')
-                ->hidden($passed)
+                ->hidden($passedForFormActions)
                 ->action(function () {
                     $this->data = [];
                     $this->dispatch('close-modal', id: 'quiz-result');
@@ -216,7 +219,7 @@ class Quiz extends Page
                 ->label('Lanjutkan')
                 ->icon('heroicon-o-arrow-right')
                 ->color('success')
-                ->visible($passed)
+                ->visible($passedForFormActions && $hasNextPost)
                 ->url(function () {
                     $nextPost = $this->getNextPost();
                     if (!$nextPost) {
@@ -236,10 +239,19 @@ class Quiz extends Page
                         ]);
                 }),
 
+            FormAction::make('finish')
+                ->label('Selesai')
+                ->icon('heroicon-o-check')
+                ->url(MyBatchResource::getUrl('view', [
+                    'record' => $this->record->slug
+                ]))
+                ->color('success')
+                ->visible($passedForFormActions && !$hasNextPost),
+
             FormAction::make('submit')
                 ->label('Submit Jawaban')
                 ->color('primary')
-                ->hidden($passed)
+                ->hidden($passedForFormActions)
                 ->action('submit'),
         ];
     }
@@ -267,6 +279,7 @@ class Quiz extends Page
             'passed' => $this->passed,
             'record' => $this->record,
             'post' => $this->post,
+            'hasNextPost' => (bool) $this->getNextPost(),
         ];
     }
 }
