@@ -3,17 +3,21 @@
 namespace App\Filament\Admin\Resources\BatchResource\Pages;
 
 use App\Filament\Admin\Resources\BatchResource;
+use App\Models\Post;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 
-class EditBatch extends EditRecord
+class ViewBatch extends ViewRecord
 {
     protected static string $resource = BatchResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
+            Actions\EditAction::make(),
         ];
     }
 }

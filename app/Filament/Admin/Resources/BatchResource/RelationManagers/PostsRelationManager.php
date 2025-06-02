@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\BatchResource\RelationManagers;
 
+use App\Filament\Admin\Resources\BatchResource\Pages\ViewBatch;
 use App\Models\Post;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,16 +11,12 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Models\Question;
-use App\Models\Answer;
-use App\Models\Submission;
-use Illuminate\Support\Facades\DB;
 
 class PostsRelationManager extends RelationManager
 {
     protected static string $relationship = 'posts';
     protected static ?string $title = 'Postingan';
+    protected static bool $isLazy = false;
 
     public function form(Form $form): Form
     {
@@ -117,14 +114,17 @@ class PostsRelationManager extends RelationManager
                 ])->columnSpanFull()
             ]);
     }
-
-
     public function table(Table $table): Table
     {
         return $table
             ->reorderable('order')
             ->defaultSort('order')
             ->recordTitleAttribute('title')
+            ->modifyQueryUsing(function (Builder $query, PostsRelationManager $livewire) {
+                if ($livewire->pageClass === ViewBatch::class) {
+                    $query->whereIn('type', ['submission']);
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('order')
                     ->label('Urutan')

@@ -12,8 +12,9 @@ return new class extends Migration {
             $table->foreignId('post_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('file_path');
-            $table->integer('score')->nullable();
             $table->text('notes')->nullable();
+            $table->integer('score')->nullable();
+            $table->boolean('is_passed')->nullable();
             $table->timestamps();
         });
     }

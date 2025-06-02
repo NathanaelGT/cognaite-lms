@@ -40,7 +40,8 @@ class BatchResource extends Resource
                         ->prefix('Rp')
                         ->mask(RawJs::make('$money($input, \',\', \'.\')'))
                         ->dehydrateStateUsing(fn ($state) => (int) str()->replace('.', '', $state))
-                        ->maxValue(1_000_000_000),
+                        ->maxValue(1_000_000_000)
+                        ->hiddenOn('view'),
 
                     TextInput::make('duration')
                         ->label('Durasi')
@@ -49,14 +50,16 @@ class BatchResource extends Resource
                         ->numeric()
                         ->required()
                         ->minValue(1)
-                        ->maxValue(1_000_000_000),
+                        ->maxValue(1_000_000_000)
+                        ->hiddenOn('view'),
                 ]),
 
                 RichEditor::make('description')
                     ->label('Deskripsi')
                     ->placeholder('Masukkan Deskripsi')
                     ->required()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->hiddenOn('view'),
 
                 FileUpload::make('thumbnail')
                     ->label('Thumbnail')
@@ -68,7 +71,8 @@ class BatchResource extends Resource
                     ->required()
                     ->preserveFilenames()
                     ->imagePreviewHeight('200')
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->hiddenOn('view'),
             ]);
     }
 
@@ -124,12 +128,11 @@ class BatchResource extends Resource
                     ->options(['g' => 'Gratis', 'b' => 'Berbayar']),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -146,6 +149,7 @@ class BatchResource extends Resource
             'index' => Pages\ListBatches::route('/'),
             'create' => Pages\CreateBatch::route('/create'),
             'edit' => Pages\EditBatch::route('/{record}/edit'),
+            'view' => Pages\ViewBatch::route('/{record}'),
         ];
     }
 }
