@@ -50,24 +50,30 @@ class SubmissionsRelationManager extends RelationManager
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $query->where('type', 'submission')
-                    ->selectRaw('*, ROW_NUMBER() OVER (ORDER BY `order`) AS `order`');
+                $query->whereIn('type', ['submission', 'quiz']);
             })
             ->defaultSort('order')
             ->recordTitleAttribute('title')
             ->columns([
-                Tables\Columns\TextColumn::make('order')
-                    ->label('Urutan')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Jenis')
+                    ->formatStateUsing(function (string $state) {
+                        return match ($state) {
+                            'material' => 'Materi',
+                            'submission' => 'Submission',
+                            'quiz' => 'Quiz',
+                            default => 'Tidak diketahui',
+                        };
+                    })
+                    ->badge(),
+
                 Tables\Columns\TextColumn::make('min_score')
                     ->label('Nilai Minimum')
-                    ->placeholder('-')
-                    ->sortable(),
+                    ->placeholder('-'),
 
                 Tables\Columns\TextColumn::make('submissions.file_path')
                     ->label('File Saya')

@@ -18,19 +18,20 @@ class MaterialsRelationManager extends RelationManager
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $query->whereNull('min_score')
-                    ->selectRaw('*, ROW_NUMBER() OVER (ORDER BY `order`) AS `order`');
+                $query->whereNull('min_score');
             })
             ->defaultSort('order')
             ->recordTitleAttribute('title')
             ->columns([
-                Tables\Columns\TextColumn::make('order')
-                    ->label('Urutan')
-                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
-                    ->sortable(),
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Deskripsi')
+                    ->searchable()
+                    ->markdown(),
             ])
             ->filters([
                 //
