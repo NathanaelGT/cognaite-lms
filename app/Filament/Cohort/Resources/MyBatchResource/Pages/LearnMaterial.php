@@ -5,10 +5,10 @@ namespace App\Filament\Cohort\Resources\MyBatchResource\Pages;
 use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\Batch;
 use App\Models\Post;
+use App\Models\UserPostProgress;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Resources\Pages\Page;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
 use Filament\Infolists\Infolist;
@@ -86,6 +86,17 @@ class LearnMaterial extends Page
                         ->label('Selanjutnya')
                         ->iconPosition('after')
                         ->url(function () {
+                            UserPostProgress::updateOrCreate(
+                                [
+                                    'user_id' => Auth::id(),
+                                    'post_id' => $this->post->id,
+                                ],
+                                [
+                                    'is_completed' => true,
+                                    'is_passed' => true
+                                ]
+                            );
+
                             $nextPost = $this->getNextPost();
                             if (!$nextPost) return null;
 

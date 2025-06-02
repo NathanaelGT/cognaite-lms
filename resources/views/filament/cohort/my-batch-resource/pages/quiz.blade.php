@@ -7,6 +7,10 @@
 >
     {{ $this->infolist }}
 
+    <form wire:submit.prevent="submit">
+        {{ $this->form }}
+    </form>
+
     <div x-data="{ open: false }" class="relative">
         <!-- Toggle Button -->
         <button
@@ -109,5 +113,86 @@
             @endforeach
         </div>
     </div>
-</x-filament-panels::page>
 
+    <div
+        x-data="{ open: false }"
+        x-on:open-modal.window="if ($event.detail.id === 'quiz-result') open = true"
+        x-show="open"
+        x-cloak
+        class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-auto text-center">
+            <h2 class="text-xl font-bold mb-4">Hasil Quiz</h2>
+
+            @if (!is_null($passed))
+                <p class="text-lg mb-2">
+                    @if ($passed)
+                        <span class="text-green-600 font-semibold">Selamat! Kamu lulus quiz ini 🎉</span>
+                    @else
+                        <span class="text-red-600 font-semibold">Maaf, kamu belum lulus 😢</span>
+                    @endif
+                </p>
+            @endif
+
+            <p class="text-lg">Skor kamu: <span class="font-semibold text-orange-600">{{ $score }}</span></p>
+
+            <div class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
+                {{-- Tombol Ulangi Quiz --}}
+                <button
+                    @click="open = false; $wire.set('data', [])"
+                    style="
+                    display: block;
+                    width: 100%;
+                    text-align: center;
+                    padding: 0.5rem 0.75rem;
+                    margin-bottom: 0.25rem;
+                    border-radius: 0.375rem;
+                    font-size: 0.95rem;
+                    background-color: #ef4444;
+                    color: white;
+                    font-weight: 600;
+                    box-shadow: none;
+                    transition: background-color 0.2s ease, color 0.2s ease;
+                    text-decoration: none;
+                    border: none;
+                "
+                    onmouseover="this.style.backgroundColor='#dc2626'; this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='#ef4444'; this.style.color='white'"
+                    onfocus="this.style.outline='2px solid #ef4444'; this.style.outlineOffset='2px'"
+                    onblur="this.style.outline='none'"
+                >
+                    Ulangi Quiz
+                </button>
+
+                @if ($passed)
+                    {{-- Tombol Selanjutnya --}}
+                    <a
+                        href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', ['record' => $record->slug, 'post' => $this->getNextPost()?->slug]) }}"
+                        style="
+                        display: block;
+                        width: 100%;
+                        text-align: center;
+                        padding: 0.5rem 0.75rem;
+                        margin-bottom: 0.25rem;
+                        border-radius: 0.375rem;
+                        font-size: 0.95rem;
+                        background-color: #22c55e;
+                        color: white;
+                        font-weight: 600;
+                        box-shadow: none;
+                        transition: background-color 0.2s ease, color 0.2s ease;
+                        text-decoration: none;
+                    "
+                        onmouseover="this.style.backgroundColor='#16a34a'; this.style.color='white'"
+                        onmouseout="this.style.backgroundColor='#22c55e'; this.style.color='white'"
+                        onfocus="this.style.outline='2px solid #22c55e'; this.style.outlineOffset='2px'"
+                        onblur="this.style.outline='none'"
+                    >
+                        Selanjutnya
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+</x-filament-panels::page>
