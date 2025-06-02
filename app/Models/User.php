@@ -85,4 +85,15 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function postProgress()
+    {
+        return $this->hasMany(UserPostProgress::class);
+    }
+
+    public function completedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'user_post_progress')
+            ->wherePivot('is_completed', true);
+    }
 }
