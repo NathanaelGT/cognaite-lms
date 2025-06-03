@@ -182,7 +182,7 @@ class Quiz extends Page
             ->first();
 
         $passedForFormActions = $this->passed ?? ($latestQuizResult->passed ?? false);
-        $hasNextPost = (bool) $this->getNextPost(); // Check if there's a next post
+        $hasNextPost = (bool) $this->getNextPost();
 
         return [
             FormAction::make('previous')

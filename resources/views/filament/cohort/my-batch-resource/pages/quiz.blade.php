@@ -165,7 +165,7 @@
                 </button>
 
                 @if ($passed)
-                    @if ($hasNextPost) {{-- Tampilkan Selanjutnya jika lulus dan ada post selanjutnya --}}
+                    @if ($hasNextPost)
                     {{-- Tombol Selanjutnya --}}
                     <a
                         href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', ['record' => $record->slug, 'post' => $this->getNextPost()?->slug]) }}"
@@ -191,7 +191,7 @@
                     >
                         Selanjutnya
                     </a>
-                    @else {{-- Tampilkan Selesai jika lulus dan tidak ada post selanjutnya --}}
+                    @else
                     {{-- Tombol Selesai --}}
                     <a
                         href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('view', ['record' => $record->slug]) }}"
