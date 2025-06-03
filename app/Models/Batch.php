@@ -5,13 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Batch extends Model
 {
-    use HasFactory;
     use HasSlug;
 
     protected $fillable = [
@@ -47,5 +45,29 @@ class Batch extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function getProgressPercentageAttribute(): int
+    {
+        if (!$this->relationLoaded('posts') || !$this->relationLoaded('users')) {
+            $this->load([
+                'posts',
+                'users' => fn ($query) => $query->where('user_id', auth()->id()),
+            ]);
+        }
+
+        $totalPosts = $this->posts->count();
+
+        if ($totalPosts === 0) {
+            return 0;
+        }
+
+        $completedPosts = auth()->user()
+            ?->postProgress()
+            ->whereIn('post_id', $this->posts->pluck('id'))
+            ->where('is_completed', true)
+            ->count() ?? 0;
+
+        return (int) round(($completedPosts / $totalPosts) * 100);
     }
 }

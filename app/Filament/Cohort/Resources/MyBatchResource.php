@@ -45,9 +45,20 @@ class MyBatchResource extends Resource
                     ->height(60)
                     ->width(60),
                 Tables\Columns\TextColumn::make('name')->label('Nama')->searchable(),
-                Tables\Columns\TextColumn::make('price')->label('Harga')
-                    ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'Gratis'),
                 Tables\Columns\TextColumn::make('duration')->label('Durasi (Menit)'),
+                Tables\Columns\TextColumn::make('progress_percentage')
+                    ->label('Progress')
+                    ->formatStateUsing(function (Batch $record) {
+                        $progress = $record->progress_percentage;
+                        return new HtmlString('
+                            <div style="width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 10px; margin-bottom: 5px;">
+                                <div style="width: '.$progress.'%; background-color: rgb(217, 119, 6); height: 100%; border-radius: 9999px;"></div>
+                            </div>
+                            <div style="font-size: 0.875rem; color: rgb(55, 65, 81); text-align: center;">
+                                '.$progress.'% selesai
+                            </div>
+                        ');
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make('detail')
@@ -93,6 +104,38 @@ class MyBatchResource extends Resource
                             ->icon('heroicon-o-clock')
                             ->suffix(' Menit'),
 
+                        TextEntry::make('progress_percentage')
+                            ->label('Progress Pembelajaran')
+                            ->formatStateUsing(function ($state, Batch $record) {
+                                $progress = $record->progress_percentage;
+                                return new HtmlString('
+                                    <div style="margin-top: 1rem;">
+                                        <div style="
+                                            width: 100%;
+                                            height: 10px;
+                                            background-color: #e5e7eb;
+                                            border-radius: 9999px;
+                                            overflow: hidden;
+                                        ">
+                                            <div style="
+                                                width: '.$progress.'%;
+                                                height: 100%;
+                                                background-color: rgb(217, 119, 6);
+                                                border-radius: 9999px;
+                                            "></div>
+                                        </div>
+                                        <p style="
+                                            text-align: center;
+                                            font-size: 0.875rem;
+                                            color: rgb(55, 65, 81);
+                                            margin-top: 0.5rem;
+                                        ">
+                                            '.$progress.'% selesai
+                                        </p>
+                                    </div>
+                                ');
+                            }),
+
                         TextEntry::make('description')
                             ->label('Deskripsi')
                             ->markdown(),
@@ -121,6 +164,9 @@ class MyBatchResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('posts');
+        return parent::getEloquentQuery()
+            ->with(['posts', 'users' => function($query) {
+                $query->where('user_id', auth()->id());
+            }]);
     }
 }
