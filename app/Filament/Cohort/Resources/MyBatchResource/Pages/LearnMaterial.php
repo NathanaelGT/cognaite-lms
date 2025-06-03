@@ -6,15 +6,15 @@ use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\Batch;
 use App\Models\Post;
 use App\Models\UserPostProgress;
+use Filament\Actions;
+use Filament\Infolists\Components\Actions as InfolistActions;
+use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
-use Filament\Infolists\Infolist;
-use Filament\Actions;
-use Filament\Infolists\Components\Actions\Action;
-use Filament\Infolists\Components\Actions as InfolistActions;
 
 class LearnMaterial extends Page
 {
@@ -66,19 +66,26 @@ class LearnMaterial extends Page
                         ->icon('heroicon-o-arrow-left')
                         ->url(function () {
                             $prevPost = $this->getPreviousPost();
-                            if (!$prevPost) return null;
+                            if (! $prevPost) {
+                                return null;
+                            }
 
-                            return $prevPost->type === 'quiz'
-                                ? MyBatchResource::getUrl('quiz', [
+                            return match ($prevPost->type) {
+                                'quiz' => MyBatchResource::getUrl('quiz', [
                                     'record' => $this->record->slug,
                                     'post' => $prevPost->slug,
-                                ])
-                                : MyBatchResource::getUrl('learn-material', [
+                                ]),
+                                'submission' => MyBatchResource::getUrl('submission', [
                                     'record' => $this->record->slug,
                                     'post' => $prevPost->slug,
-                                ]);
+                                ]),
+                                default => MyBatchResource::getUrl('learn-material', [
+                                    'record' => $this->record->slug,
+                                    'post' => $prevPost->slug,
+                                ]),
+                            };
                         })
-                        ->disabled(fn () => !$this->getPreviousPost())
+                        ->disabled(fn () => ! $this->getPreviousPost())
                         ->color('primary'),
 
                     Action::make('next')
@@ -93,24 +100,31 @@ class LearnMaterial extends Page
                                 ],
                                 [
                                     'is_completed' => true,
-                                    'is_passed' => true
+                                    'is_passed' => true,
                                 ]
                             );
 
                             $nextPost = $this->getNextPost();
-                            if (!$nextPost) return null;
+                            if (! $nextPost) {
+                                return null;
+                            }
 
-                            return $nextPost->type === 'quiz'
-                                ? MyBatchResource::getUrl('quiz', [
+                            return match ($nextPost->type) {
+                                'quiz' => MyBatchResource::getUrl('quiz', [
                                     'record' => $this->record->slug,
                                     'post' => $nextPost->slug,
-                                ])
-                                : MyBatchResource::getUrl('learn-material', [
+                                ]),
+                                'submission' => MyBatchResource::getUrl('submission', [
                                     'record' => $this->record->slug,
                                     'post' => $nextPost->slug,
-                                ]);
+                                ]),
+                                default => MyBatchResource::getUrl('learn-material', [
+                                    'record' => $this->record->slug,
+                                    'post' => $nextPost->slug,
+                                ]),
+                            };
                         })
-                        ->disabled(fn () => !$this->getNextPost())
+                        ->disabled(fn () => ! $this->getNextPost())
                         ->color('primary')
                         ->visible(fn () => (bool) $this->getNextPost()),
 
@@ -118,10 +132,10 @@ class LearnMaterial extends Page
                         ->label('Selesai')
                         ->icon('heroicon-o-check')
                         ->url(MyBatchResource::getUrl('view', [
-                            'record' => $this->record->slug
+                            'record' => $this->record->slug,
                         ]))
                         ->color('success')
-                        ->visible(fn () => !$this->getNextPost()),
+                        ->visible(fn () => ! $this->getNextPost()),
                 ])
                     ->alignBetween()
                     ->columnSpanFull(),

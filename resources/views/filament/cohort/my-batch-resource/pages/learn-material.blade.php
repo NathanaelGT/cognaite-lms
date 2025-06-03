@@ -72,15 +72,20 @@
             </div>
             @foreach ($record->posts()->orderBy('order')->get() as $item)
                 @php
-                    $postUrl = $item->type === 'quiz'
-                        ? \App\Filament\Cohort\Resources\MyBatchResource::getUrl('quiz', [
+                    $postUrl = match ($item->type) {
+                        'quiz' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('quiz', [
                             'record' => $record->slug,
                             'post' => $item->slug,
-                        ])
-                        : \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', [
+                        ]),
+                        'submission' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('submission', [
                             'record' => $record->slug,
                             'post' => $item->slug,
-                        ]);
+                        ]),
+                        default => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', [
+                            'record' => $record->slug,
+                            'post' => $item->slug,
+                        ]),
+                    };
                 @endphp
                 <a
                     href="{{ $postUrl }}"
@@ -110,4 +115,3 @@
         </div>
     </div>
 </x-filament-panels::page>
-

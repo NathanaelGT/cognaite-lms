@@ -2,26 +2,25 @@
 
 namespace App\Filament\Cohort\Resources;
 
-use App\Models\Batch;
-use Filament\Resources\Resource;
-use Filament\Support\Enums\Alignment;
-use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Actions\Action;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Cohort\Resources\MyBatchResource\Pages;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Batch;
 use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
-
 
 class MyBatchResource extends Resource
 {
@@ -59,7 +58,7 @@ class MyBatchResource extends Resource
                     ->icon('heroicon-o-book-open')
                     ->url(fn (Batch $record) => MyBatchResource::getUrl('learn-material', [
                         'record' => $record->slug,
-                        'post'   => optional($record->posts()->orderBy('order')->first())->slug,
+                        'post' => optional($record->posts()->orderBy('order')->first())->slug,
                     ]))
                     ->visible(fn (Batch $record) => $record->posts()->exists()),
             ])
@@ -71,7 +70,6 @@ class MyBatchResource extends Resource
         return $infolist
             ->schema([
                 Section::make(function (Batch $record) {
-
                     return new HtmlString('<img src="' . Storage::disk('public')->url($record->thumbnail) . '" class="max-w-none object-cover object-center ml-auto" style="height: 250px; width: 250px;">');
                 })
                     ->aside()
@@ -115,8 +113,9 @@ class MyBatchResource extends Resource
         return [
             'index' => Pages\ListMyBatches::route('/'),
             'view' => Pages\ViewMyBatch::route('/{record}'),
-            'learn-material'  => Pages\LearnMaterial::route('/{record}/materi/{post}'),
+            'learn-material' => Pages\LearnMaterial::route('/{record}/materi/{post}'),
             'quiz' => Pages\Quiz::route('/{record}/quiz/{post}'),
+            'submission' => Pages\SubmissionPage::route('/{record}/submission/{post}'),
         ];
     }
 
