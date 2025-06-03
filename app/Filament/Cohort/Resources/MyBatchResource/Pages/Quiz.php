@@ -30,11 +30,25 @@ class Quiz extends Page
     public ?array $data = [];
     public ?int $score = null;
     public ?bool $passed = null;
+    public $hasAttempted = false;
+    public $maxScore = 100;
 
     public function mount(Batch $record, Post $post): void
     {
         $this->record = $record;
         $this->post = $post;
+
+        $attempt = QuizResult::where('user_id', auth()->id())
+            ->where('post_id', $this->post->id)
+            ->latest()
+            ->first();
+
+        if ($attempt) {
+            $this->hasAttempted = true;
+            $this->passed = $attempt->passed;
+            $this->score = $attempt->score;
+            $this->maxScore = $attempt->max_score ?? 100;
+        }
     }
 
     protected function getHeaderActions(): array
