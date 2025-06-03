@@ -7,7 +7,6 @@ use App\Models\Batch;
 use App\Models\Post;
 use App\Models\QuizResult;
 use App\Models\UserPostProgress;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Radio;
@@ -19,33 +18,24 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\ManagesPostNavigation;
 
 class Quiz extends Page
 {
+    use ManagesPostNavigation;
+
     protected static string $resource = MyBatchResource::class;
     protected static string $view = 'filament.cohort.my-batch-resource.pages.quiz';
 
-    public Post $post;
-    public Batch $record;
     public ?array $data = [];
     public ?int $score = null;
     public ?bool $passed = null;
     public $hasAttempted = false;
     public $maxScore = 100;
-    public $progressPercentage;
 
     public function mount(Batch $record, Post $post): void
     {
-        $this->record = $record;
-        $this->post = $post;
-
-        $totalPosts = $record->posts()->count();
-        $completedPosts = auth()->user()->postProgress()
-            ->whereIn('post_id', $record->posts()->pluck('id'))
-            ->where('is_completed', true)
-            ->count();
-
-        $this->progressPercentage = $totalPosts > 0 ? round(($completedPosts / $totalPosts) * 100) : 0;
+        $this->commonMount($record, $post);
 
         $attempt = QuizResult::where('user_id', auth()->id())
             ->where('post_id', $this->post->id)
@@ -62,18 +52,25 @@ class Quiz extends Page
 
     protected function getHeaderActions(): array
     {
-        return [
-            Action::make('back')
-                ->label('Kembali')
-                ->icon('heroicon-o-arrow-long-left')
-                ->url(fn () => MyBatchResource::getUrl('view', [
-                    'record' => $this->record->slug,
-                ])),
-        ];
+        return $this->getCommonHeaderActions();
     }
 
     public function form(Form $form): Form
     {
+        $commonFormNavigationActions = $this->getCommonFormNavigationActions();
+
+        $quizFormActions = [];
+        foreach ($commonFormNavigationActions as $action) {
+            if (!in_array($action->getName(), ['next', 'finish'])) {
+                $quizFormActions[] = $action;
+            }
+        }
+
+        $quizFormActions[] = FormAction::make('submit')
+            ->label('Submit Jawaban')
+            ->action('submit')
+            ->color('primary');
+
         return $form
             ->schema([
                 Section::make('Pertanyaan')
@@ -89,34 +86,7 @@ class Quiz extends Page
                     )
                     ->columns(1),
 
-                Actions::make([
-                    FormAction::make('previous')
-                        ->label('Sebelumnya')
-                        ->icon('heroicon-o-arrow-left')
-                        ->url(function () {
-                            $prevPost = $this->getPreviousPost();
-                            if (! $prevPost) {
-                                return null;
-                            }
-
-                            return $prevPost->type === 'quiz'
-                                ? MyBatchResource::getUrl('quiz', [
-                                    'record' => $this->record->slug,
-                                    'post' => $prevPost->slug,
-                                ])
-                                : MyBatchResource::getUrl('learn-material', [
-                                    'record' => $this->record->slug,
-                                    'post' => $prevPost->slug,
-                                ]);
-                        })
-                        ->disabled(fn () => ! $this->getPreviousPost())
-                        ->color('primary'),
-
-                    FormAction::make('submit')
-                        ->label('Submit Jawaban')
-                        ->action('submit')
-                        ->color('primary'),
-                ])->alignBetween(),
+                Actions::make($quizFormActions)->alignBetween(),
             ])
             ->statePath('data');
     }
@@ -183,7 +153,7 @@ class Quiz extends Page
         $this->score = $score;
         $minScore = $this->post->min_score ?? 0;
         $this->passed = $score >= $minScore;
-        $this->dispatch('open-modal', id: 'quiz-result');
+        $this->dispatch('open-modal', id: 'quiz-result', passed: $this->passed, score: $this->score, maxScore: $this->maxScore);
 
         UserPostProgress::updateOrCreate(
             [
@@ -207,104 +177,38 @@ class Quiz extends Page
         $passedForFormActions = $this->passed ?? ($latestQuizResult->passed ?? false);
         $hasNextPost = (bool) $this->getNextPost();
 
-        return [
-            FormAction::make('previous')
-                ->label('Sebelumnya')
-                ->icon('heroicon-o-arrow-left')
-                ->url(function () {
-                    $prevPost = $this->getPreviousPost();
-                    if (! $prevPost) {
-                        return null;
-                    }
+        $commonActions = $this->getCommonFormNavigationActions();
 
-                    return match ($prevPost->type) {
-                        'quiz' => MyBatchResource::getUrl('quiz', [
-                            'record' => $this->record->slug,
-                            'post' => $prevPost->slug,
-                        ]),
-                        'submission' => MyBatchResource::getUrl('submission', [
-                            'record' => $this->record->slug,
-                            'post' => $prevPost->slug,
-                        ]),
-                        default => MyBatchResource::getUrl('learn-material', [
-                            'record' => $this->record->slug,
-                            'post' => $prevPost->slug,
-                        ]),
-                    };
-                })
-                ->disabled(fn () => ! $this->getPreviousPost())
-                ->color('primary'),
+        $formActions = [];
+        foreach ($commonActions as $action) {
+            $formAction = $action;
 
-            FormAction::make('retry')
-                ->label('Ulangi Quiz')
-                ->icon('heroicon-o-arrow-path')
-                ->color('danger')
-                ->hidden($passedForFormActions)
-                ->action(function () {
-                    $this->data = [];
-                    $this->dispatch('close-modal', id: 'quiz-result');
-                }),
+            if ($action->getName() === 'next') {
+                $formAction
+                    ->visible($passedForFormActions && $hasNextPost);
+            } elseif ($action->getName() === 'finish') {
+                $formAction->visible($passedForFormActions && !$hasNextPost);
+            }
+            $formActions[] = $formAction;
+        }
 
-            FormAction::make('next')
-                ->label('Lanjutkan')
-                ->icon('heroicon-o-arrow-right')
-                ->color('success')
-                ->visible($passedForFormActions && $hasNextPost)
-                ->url(function () {
-                    $nextPost = $this->getNextPost();
-                    if (! $nextPost) {
-                        return MyBatchResource::getUrl('view', [
-                            'record' => $this->record->slug,
-                        ]);
-                    }
+        $formActions[] = FormAction::make('retry')
+            ->label('Ulangi Quiz')
+            ->icon('heroicon-o-arrow-path')
+            ->color('danger')
+            ->hidden($passedForFormActions)
+            ->action(function () {
+                $this->data = [];
+                $this->dispatch('close-modal', id: 'quiz-result');
+            });
 
-                    return match ($nextPost->type) {
-                        'quiz' => MyBatchResource::getUrl('quiz', [
-                            'record' => $this->record->slug,
-                            'post' => $nextPost->slug,
-                        ]),
-                        'submission' => MyBatchResource::getUrl('submission', [
-                            'record' => $this->record->slug,
-                            'post' => $nextPost->slug,
-                        ]),
-                        default => MyBatchResource::getUrl('learn-material', [
-                            'record' => $this->record->slug,
-                            'post' => $nextPost->slug,
-                        ]),
-                    };
-                }),
+        $formActions[] = FormAction::make('submit')
+            ->label('Submit Jawaban')
+            ->color('primary')
+            ->hidden($passedForFormActions)
+            ->action('submit');
 
-            FormAction::make('finish')
-                ->label('Selesai')
-                ->icon('heroicon-o-check')
-                ->url(MyBatchResource::getUrl('view', [
-                    'record' => $this->record->slug,
-                ]))
-                ->color('success')
-                ->visible($passedForFormActions && ! $hasNextPost),
-
-            FormAction::make('submit')
-                ->label('Submit Jawaban')
-                ->color('primary')
-                ->hidden($passedForFormActions)
-                ->action('submit'),
-        ];
-    }
-
-    protected function getPreviousPost(): ?Post
-    {
-        return $this->record->posts()
-            ->where('order', '<', $this->post->order)
-            ->orderBy('order', 'desc')
-            ->first();
-    }
-
-    protected function getNextPost(): ?Post
-    {
-        return $this->record->posts()
-            ->where('order', '>', $this->post->order)
-            ->orderBy('order', 'asc')
-            ->first();
+        return $formActions;
     }
 
     protected function getViewData(): array
@@ -315,6 +219,7 @@ class Quiz extends Page
             'record' => $this->record,
             'post' => $this->post,
             'hasNextPost' => (bool) $this->getNextPost(),
+            'maxScore' => $this->maxScore,
         ];
     }
 }
