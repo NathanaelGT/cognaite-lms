@@ -65,7 +65,7 @@ class Batch extends Model
         $completedPosts = auth()->user()
             ?->postProgress()
             ->whereIn('post_id', $this->posts->pluck('id'))
-            ->where('is_completed', true)
+            ->where('is_passed', true)
             ->count() ?? 0;
 
         return (int) round(($completedPosts / $totalPosts) * 100);

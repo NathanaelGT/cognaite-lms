@@ -11,7 +11,8 @@ class UserPostProgress extends Model
         'user_id',
         'post_id',
         'is_completed',
-        'is_passed'
+        'is_passed',
+        'updated_at'
     ];
 
     public function user(): BelongsTo

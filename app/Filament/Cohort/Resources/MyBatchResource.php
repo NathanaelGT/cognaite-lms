@@ -64,13 +64,49 @@ class MyBatchResource extends Resource
                 Tables\Actions\ViewAction::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-o-eye'),
+
                 Action::make('learn')
-                    ->label('Belajar Sekarang')
+                    ->label(function (Batch $record) use ($user) {
+                        $lastAccessedPost = $user->getLastAccessedPost($record->id);
+                        $isBatchCompleted = $user->isCompletedBatch($record->id);
+
+                        return $isBatchCompleted ? 'Belajar Kembali' :
+                            ($lastAccessedPost ? 'Lanjutkan Belajar' : 'Belajar Sekarang');
+                    })
                     ->icon('heroicon-o-book-open')
-                    ->url(fn (Batch $record) => MyBatchResource::getUrl('learn-material', [
-                        'record' => $record->slug,
-                        'post' => optional($record->posts()->orderBy('order')->first())->slug,
-                    ]))
+                    ->url(function (Batch $record) use ($user) {
+                        $lastAccessedPost = $user->getLastAccessedPost($record->id);
+                        $isBatchCompleted = $user->isCompletedBatch($record->id);
+
+                        if ($isBatchCompleted) {
+                            return MyBatchResource::getUrl('learn-material', [
+                                'record' => $record->slug,
+                                'post' => $record->posts()->orderBy('order')->first()->slug,
+                            ]);
+                        }
+
+                        if ($lastAccessedPost) {
+                            return match ($lastAccessedPost->type) {
+                                'quiz' => MyBatchResource::getUrl('quiz', [
+                                    'record' => $record->slug,
+                                    'post' => $lastAccessedPost->slug,
+                                ]),
+                                'submission' => MyBatchResource::getUrl('submission', [
+                                    'record' => $record->slug,
+                                    'post' => $lastAccessedPost->slug,
+                                ]),
+                                default => MyBatchResource::getUrl('learn-material', [
+                                    'record' => $record->slug,
+                                    'post' => $lastAccessedPost->slug,
+                                ]),
+                            };
+                        }
+
+                        return MyBatchResource::getUrl('learn-material', [
+                            'record' => $record->slug,
+                            'post' => $record->posts()->orderBy('order')->first()->slug,
+                        ]);
+                    })
                     ->visible(fn (Batch $record) => $record->posts()->exists()),
             ])
             ->paginated();

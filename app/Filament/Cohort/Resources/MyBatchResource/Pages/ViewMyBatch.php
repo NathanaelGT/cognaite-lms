@@ -12,14 +12,46 @@ class ViewMyBatch extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $user = auth()->user();
+        $lastAccessedPost = $user->getLastAccessedPost($this->record->id);
+        $isBatchCompleted = $user->isCompletedBatch($this->record->id);
+        $isFirstTime = !$lastAccessedPost && !$isBatchCompleted;
+
         return [
             Actions\Action::make('learn')
-                ->label('Belajar Sekarang')
+                ->label($isBatchCompleted ? 'Belajar Kembali' :
+                    ($isFirstTime ? 'Belajar Sekarang' : 'Lanjutkan Belajar'))
                 ->icon('heroicon-o-book-open')
-                ->url(fn () => MyBatchResource::getUrl('learn-material', [
-                    'record' => $this->record->slug,
-                    'post'   => $this->record->posts()->orderBy('order')->first()->slug,
-                ]))
+                ->url(function () use ($lastAccessedPost, $isBatchCompleted) {
+                    if ($isBatchCompleted) {
+                        return MyBatchResource::getUrl('learn-material', [
+                            'record' => $this->record->slug,
+                            'post' => $this->record->posts()->orderBy('order')->first()->slug,
+                        ]);
+                    }
+
+                    if ($lastAccessedPost) {
+                        return match ($lastAccessedPost->type) {
+                            'quiz' => MyBatchResource::getUrl('quiz', [
+                                'record' => $this->record->slug,
+                                'post' => $lastAccessedPost->slug,
+                            ]),
+                            'submission' => MyBatchResource::getUrl('submission', [
+                                'record' => $this->record->slug,
+                                'post' => $lastAccessedPost->slug,
+                            ]),
+                            default => MyBatchResource::getUrl('learn-material', [
+                                'record' => $this->record->slug,
+                                'post' => $lastAccessedPost->slug,
+                            ]),
+                        };
+                    }
+
+                    return MyBatchResource::getUrl('learn-material', [
+                        'record' => $this->record->slug,
+                        'post' => $this->record->posts()->orderBy('order')->first()->slug,
+                    ]);
+                })
                 ->visible(fn () => $this->record->posts()->exists()),
         ];
     }

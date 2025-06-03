@@ -96,4 +96,26 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
         return $this->belongsToMany(Post::class, 'user_post_progress')
             ->wherePivot('is_completed', true);
     }
+
+    public function getLastAccessedPost($batchId)
+    {
+        return $this->postProgress()
+            ->with('post')
+            ->whereHas('post', fn($q) => $q->where('batch_id', $batchId))
+            ->where('is_completed', true)
+            ->latest('id')
+            ->first()
+            ?->post;
+    }
+
+    public function isCompletedBatch($batchId)
+    {
+        $totalPosts = Post::where('batch_id', $batchId)->count();
+        $completedPosts = $this->postProgress()
+            ->whereHas('post', fn($q) => $q->where('batch_id', $batchId))
+            ->where('is_completed', true)
+            ->count();
+
+        return $totalPosts > 0 && $completedPosts >= $totalPosts;
+    }
 }
