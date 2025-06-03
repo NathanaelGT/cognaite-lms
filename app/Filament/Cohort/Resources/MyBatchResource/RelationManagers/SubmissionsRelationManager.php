@@ -51,12 +51,18 @@ class SubmissionsRelationManager extends RelationManager
                     ->label('Nilai')
                     ->state(function ($record) use ($userId) {
                         if ($record->type === 'quiz') {
-                            $quizResult = $record->quizResults->first();
+                            $quizResult = $record->quizResults()
+                            ->where('user_id', $userId)
+                            ->latest()
+                            ->first();
                             return $quizResult ? ($quizResult->score ?? 'Belum dinilai') : '-';
                         }
 
                         if ($record->type === 'submission') {
-                            $submission = $record->submissions->first();
+                            $submission = $record->submissions()
+                            ->where('user_id', $userId)
+                            ->latest()
+                            ->first();
                             return $submission ? ($submission->score ?? 'Sedang dinilai') : '-';
                         }
 
