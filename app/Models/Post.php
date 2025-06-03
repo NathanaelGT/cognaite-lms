@@ -74,4 +74,9 @@ class Post extends Model
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function quizResults()
+    {
+        return $this->hasMany(QuizResult::class);
+    }
 }

@@ -6,6 +6,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class SubmissionsRelationManager extends RelationManager
 {
@@ -14,16 +15,21 @@ class SubmissionsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
+        $userId = Auth::id();
+
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->whereIn('type', ['submission', 'quiz']);
+            ->modifyQueryUsing(function (Builder $query) use ($userId) {
+                $query->whereIn('type', ['submission', 'quiz'])
+                    ->with([
+                        'quizResults' => fn ($query) => $query->where('user_id', $userId),
+                        'submissions' => fn ($query) => $query->where('user_id', $userId)
+                    ]);
             })
             ->defaultSort('order')
             ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Judul')
-                    ->sortable(),
+                    ->label('Judul'),
 
                 Tables\Columns\TextColumn::make('type')
                     ->label('Jenis')
@@ -41,10 +47,28 @@ class SubmissionsRelationManager extends RelationManager
                     ->label('Nilai Minimum')
                     ->placeholder('-'),
 
-                Tables\Columns\TextColumn::make('submissions.file_path')
-                    ->label('File Saya')
-                    ->formatStateUsing(function ($state) {
-                        return $state ? 'Sudah Upload' : 'Belum Upload';
+                Tables\Columns\TextColumn::make('user_score')
+                    ->label('Nilai')
+                    ->state(function ($record) use ($userId) {
+                        if ($record->type === 'quiz') {
+                            $quizResult = $record->quizResults->first();
+                            return $quizResult ? ($quizResult->score ?? 'Belum dinilai') : '-';
+                        }
+
+                        if ($record->type === 'submission') {
+                            $submission = $record->submissions->first();
+                            return $submission ? ($submission->score ?? 'Sedang dinilai') : '-';
+                        }
+
+                        return '-';
+                    })
+                    ->color(function ($state) {
+                        if (is_numeric($state)) {
+                            return 'success';
+                        } elseif ($state === 'Sedang dinilai') {
+                            return 'warning';
+                        }
+                        return 'gray';
                     }),
             ]);
     }
