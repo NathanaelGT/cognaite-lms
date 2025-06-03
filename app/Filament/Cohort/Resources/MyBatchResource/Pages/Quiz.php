@@ -32,11 +32,20 @@ class Quiz extends Page
     public ?bool $passed = null;
     public $hasAttempted = false;
     public $maxScore = 100;
+    public $progressPercentage;
 
     public function mount(Batch $record, Post $post): void
     {
         $this->record = $record;
         $this->post = $post;
+
+        $totalPosts = $record->posts()->count();
+        $completedPosts = auth()->user()->postProgress()
+            ->whereIn('post_id', $record->posts()->pluck('id'))
+            ->where('is_completed', true)
+            ->count();
+
+        $this->progressPercentage = $totalPosts > 0 ? round(($completedPosts / $totalPosts) * 100) : 0;
 
         $attempt = QuizResult::where('user_id', auth()->id())
             ->where('post_id', $this->post->id)

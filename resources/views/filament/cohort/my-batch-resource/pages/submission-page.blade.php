@@ -15,7 +15,7 @@
         <button
             x-on:click="open = !open"
             :style="open ? 'left: 16rem; top: 4.5rem;' : 'left: 1rem; top: 4.5rem;'"
-            class="fixed z-50 bg-white border border-gray-300 rounded-full shadow-md p-2 hover:bg-gray-100 transition"
+            class="fixed z-50 bg-white border border-gray-300 rounded-full shadow-md p-2 hover:bg-gray-100 **transition-all duration-200 ease-in-out**"
             title="Toggle Daftar Materi"
         >
             <svg
@@ -64,13 +64,26 @@
         >
             <h3 class="font-bold text-lg mb-2">Daftar Materi</h3>
             <div style="width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 10px; margin-bottom: 0; margin-top: 1rem">
-                <div style="width: 45%; background-color: rgb(217, 119, 6); height: 100%; border-radius: 9999px;"></div>
+                <div style="width: {{ $progressPercentage }}%; background-color: rgb(217, 119, 6); height: 100%; border-radius: 9999px;"></div>
             </div>
             <div style="font-size: 0.875rem; color: rgb(55, 65, 81); margin-bottom: 1rem;">
-                45% selesai
+                {{ $progressPercentage }}% selesai
             </div>
+
+            @php
+                $previousPassed = true;
+            @endphp
+
             @foreach ($record->posts()->orderBy('order')->get() as $item)
                 @php
+                    $isPassed = auth()->user()->postProgress->where('post_id', $item->id)->first()->is_passed ?? false;
+
+                    $isAccessible = $previousPassed;
+
+                    if (!$isPassed && $item->order >= $post->order) {
+                        $previousPassed = false;
+                    }
+
                     $postUrl = match ($item->type) {
                         'quiz' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('quiz', [
                             'record' => $record->slug,
@@ -86,9 +99,15 @@
                         ]),
                     };
                 @endphp
-                <a
-                    href="{{ $postUrl }}"
-                    style="
+
+                <div class="relative">
+                    <a
+                        href="{{ $isAccessible ? $postUrl : '#' }}"
+                        @if(!$isAccessible)
+                            onclick="event.preventDefault();"
+                        title="Selesaikan materi sebelumnya terlebih dahulu"
+                        @endif
+                        style="
                         display: block;
                         width: 100%;
                         text-align: left;
@@ -96,20 +115,31 @@
                         margin-bottom: 0.25rem;
                         border-radius: 0.375rem;
                         font-size: 0.95rem;
-                        background-color: {{ $post->id === $item->id ? 'rgb(217 119 6)' : 'white' }};
-                        color: {{ $post->id === $item->id ? 'white' : '#374151' }};
+                        background-color: {{ $post->id === $item->id ? 'rgb(217 119 6)' : ($isAccessible ? 'white' : '#f3f4f6') }};
+                        color: {{ $post->id === $item->id ? 'white' : ($isAccessible ? '#374151' : '#9ca3af') }};
                         font-weight: {{ $post->id === $item->id ? '600' : 'normal' }};
                         box-shadow: {{ $post->id === $item->id ? '0 0 0 2px rgb(217 119 6)' : 'none' }};
                         transition: background-color 0.2s ease, color 0.2s ease;
                         text-decoration: none;
+                        cursor: {{ $isAccessible ? 'pointer' : 'not-allowed' }};
                     "
-                    onmouseover="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(180 90 5)' : 'rgb(254 243 199)' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : 'rgb(180 90 5)' }}'"
-                    onmouseout="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(217 119 6)' : 'white' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : '#374151' }}'"
-                    onfocus="this.style.outline='2px solid rgb(217 119 6)'; this.style.outlineOffset='2px'"
-                    onblur="this.style.outline='none'"
-                >
-                    {{ $item->title }}
-                </a>
+                        @if($isAccessible)
+                            onmouseover="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(180 90 5)' : 'rgb(254 243 199)' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : 'rgb(180 90 5)' }}'"
+                        onmouseout="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(217 119 6)' : 'white' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : '#374151' }}'"
+                        @endif
+                    >
+                        {{ $item->title }}
+                        @if(!$isAccessible)
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        @endif
+                    </a>
+
+                    @if(!$isAccessible)
+                        <div class="absolute inset-0 bg-gray-100 opacity-50 rounded-md"></div>
+                    @endif
+                </div>
             @endforeach
         </div>
     </div>
