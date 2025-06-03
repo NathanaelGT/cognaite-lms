@@ -34,11 +34,24 @@ class SubmissionPage extends Page implements HasForms
     public Post $post;
     public Batch $record;
     public ?array $data = [];
+    public $hasSubmitted = false;
+    public $submissionStatus = null;
 
     public function mount(Batch $record, Post $post): void
     {
         $this->record = $record;
         $this->post = $post;
+
+        $submission = Submission::where('post_id', $this->post->id)
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->first();
+
+        if ($submission) {
+            $this->hasSubmitted = true;
+            $this->submissionStatus = $submission->status;
+        }
+
         $this->form->fill();
     }
 
@@ -90,7 +103,7 @@ class SubmissionPage extends Page implements HasForms
                             ->label('Catatan Tambahan (opsional)')
                             ->rows(4)
                             ->maxLength(500)
-                            ->placeholder('Tambahkan catatan untuk reviewer')
+                            ->placeholder('Tambahkan catatan untuk mentor')
                             ->nullable(),
                     ])
                     ->columns(1),
@@ -167,10 +180,7 @@ class SubmissionPage extends Page implements HasForms
             ]
         );
 
-        Notification::make()
-            ->title('Submission Berhasil')
-            ->success()
-            ->send();
+        $this->dispatch('submission-success');
     }
 
     protected function getPreviousPost(): ?Post
