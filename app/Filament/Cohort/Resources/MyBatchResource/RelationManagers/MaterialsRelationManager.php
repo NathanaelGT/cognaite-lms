@@ -17,24 +17,19 @@ class MaterialsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->whereNull('min_score');
-            })
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('min_score'))
             ->defaultSort('order')
             ->recordTitleAttribute('title')
             ->columns([
-
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('description')
                     ->label('Deskripsi')
                     ->searchable()
                     ->markdown(),
             ])
             ->filters([
-                //
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

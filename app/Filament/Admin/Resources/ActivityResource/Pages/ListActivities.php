@@ -14,7 +14,11 @@ class ListActivities extends ListRecords
 
     protected function paginateTableQuery(Builder $query): CursorPaginator
     {
-        return $query->cursorPaginate(($this->getTableRecordsPerPage() === 'all') ? $query->count() : $this->getTableRecordsPerPage());
+        return $query->cursorPaginate(
+            ($this->getTableRecordsPerPage() === 'all')
+                ? $query->count()
+                : $this->getTableRecordsPerPage()
+        );
     }
 
     protected function getHeaderActions(): array

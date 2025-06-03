@@ -5,23 +5,23 @@ namespace App\Filament\Cohort\Resources;
 use App\Enums\BatchUserStatus;
 use App\Enums\TransactionStatus;
 use App\Filament\Cohort\Pages\Pay;
-use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Filament\Cohort\Resources\BatchResource\Pages;
 use App\Filament\Cohort\Resources\BatchResource\RelationManagers;
+use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\Batch;
 use App\Models\Transaction;
+use Filament\Infolists;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
-use Filament\Panel;
+use Filament\Infolists\Infolist;
+use Filament\Notifications;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\TextColumn\TextColumnSize;
-use Filament\Tables\Table;
 use Filament\Tables;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
-use Filament\Notifications;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn\TextColumnSize;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -66,7 +66,9 @@ class BatchResource extends Resource
                             ->alignment(Alignment::Center)
                             ->size(TextColumnSize::ExtraSmall),
 
-                        Tables\Columns\TextColumn::make('duration')->label('Durasi')->suffix(' Menit')
+                        Tables\Columns\TextColumn::make('duration')
+                            ->label('Durasi')
+                            ->suffix(' Menit')
                             ->alignment(Alignment::End)
                             ->size(TextColumnSize::ExtraSmall),
                     ]),
@@ -154,7 +156,7 @@ class BatchResource extends Resource
                     $query->where('user_id', Auth::id());
                 });
             })
-            ->recordUrl(fn() => null);
+            ->recordUrl(fn () => null);
     }
 
     public static function infolist(Infolist $infolist): Infolist
