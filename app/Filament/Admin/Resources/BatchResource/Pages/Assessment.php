@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\BatchResource\Pages;
 
 use App\Filament\Admin\Resources\BatchResource;
 use App\Filament\Admin\Resources\BatchResource\RelationManagers\PostsRelationManager;
+use App\Models\UserPostProgress;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Pages\ListRecords;
@@ -96,6 +97,32 @@ class Assessment extends ListRecords
                         $record->update([
                             'score' => $data['score'],
                         ]);
+
+                        $minScore = $record->post->min_score;
+
+                        if ($data['score'] >= $minScore) {
+                            UserPostProgress::updateOrCreate(
+                                [
+                                    'user_id' => $record->user_id,
+                                    'post_id' => $record->post_id,
+                                ],
+                                [
+                                    'is_passed' => true,
+                                    'is_completed' => true,
+                                ]
+                            );
+                        } else {
+                            UserPostProgress::updateOrCreate(
+                                [
+                                    'user_id' => $record->user_id,
+                                    'post_id' => $record->post_id,
+                                ],
+                                [
+                                    'is_passed' => false,
+                                    'is_completed' => true,
+                                ]
+                            );
+                        }
                     })
                     ->modalHeading('Input Nilai')
                     ->modalSubmitActionLabel('Simpan'),
