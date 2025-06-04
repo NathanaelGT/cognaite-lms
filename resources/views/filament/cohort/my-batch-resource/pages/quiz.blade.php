@@ -15,17 +15,16 @@
 
     <div
         x-data="{
-            open: {{ $hasAttempted ? 'true' : 'false' }},
-            passed: {{ $passed ? 'true' : 'false' }},
-            score: {{ $score ?? 0 }},
-            maxScore: {{ $maxScore ?? 100 }}
-        }"
+        open: {{ $hasAttempted ? 'true' : 'false' }},
+        passed: {{ $passed ? 'true' : 'false' }},
+        score: {{ $score ?? 0 }},
+        minScore: {{ $post->min_score ?? 0 }} }"
         x-on:open-modal.window="if ($event.detail.id === 'quiz-result') {
-            open = true;
-            passed = $event.detail.passed;
-            score = $event.detail.score;
-            maxScore = $event.detail.maxScore;
-        }"
+        open = true;
+        passed = $event.detail.passed;
+        score = $event.detail.score;
+        minScore = $event.detail.minScore;
+    }"
         x-show="open"
         x-cloak
         x-transition:enter="transition ease-out duration-300"
@@ -46,79 +45,70 @@
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             class="relative w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden"
-            @click.away="open = false"
         >
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 0.5rem; background-color: {{ $passed ? '#10b981' : '#ef4444' }}"></div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 0.5rem;"
+                 :style="{ backgroundColor: passed ? '#10b981' : '#ef4444' }"></div>
 
             <div style="padding: 2rem 1.5rem;">
-                <div style="margin: 0 auto; display: flex; align-items: center; justify-content: center; height: 4rem; width: 4rem; border-radius: 9999px; background-color: {{ $passed ? '#d1fae5' : '#fee2e2' }}">
-                    @if($passed)
-                        <svg style="height: 2rem; width: 2rem; color: #059669" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                    @else
-                        <svg style="height: 2rem; width: 2rem; color: #dc2626" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    @endif
+                <div style="margin: 0 auto; display: flex; align-items: center; justify-content: center; height: 4rem; width: 4rem; border-radius: 9999px;"
+                     :style="{ backgroundColor: passed ? '#d1fae5' : '#fee2e2' }">
+                    <svg style="height: 2rem; width: 2rem;"
+                         :style="{ color: passed ? '#059669' : '#dc2626' }"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              :d="passed ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'" />
+                    </svg>
                 </div>
 
                 <h3 style="margin-top: 1rem; text-align: center; font-size: 1.5rem; line-height: 2rem; font-weight: 700; color: #111827">
                     Hasil Quiz
                 </h3>
 
-                <div style="margin-top: 1rem; text-align: center;">
-                    @if (!is_null($passed))
-                        <p style="font-size: 1.125rem; line-height: 1.75rem; color: {{ $passed ? '#059669' : '#dc2626' }}; font-weight: 600;">
-                            @if ($passed)
-                                Selamat! Kompetensi Tercapai.
-                            @else
-                                Skor Anda Belum Mencapai Batas Minimum. Silakan Ulangi.
-                            @endif
-                        </p>
-                    @endif
+                <div style="margin-top: 0.5rem; text-align: center;">
+                    <p x-show="passed" style="font-size: 1.25rem; line-height: 1.75rem; color: #059669; font-weight: 600;">
+                        Selamat! Kompetensi Tercapai.
+                    </p>
+                    <p x-show="!passed" style="font-size: 1.25rem; line-height: 1.75rem; color: #dc2626; font-weight: 600;">
+                        Skor Anda Belum Mencapai Batas Minimum. Silakan Ulangi.
+                    </p>
+                </div>
 
-                    <div style="margin-top: 1.5rem;">
-                        <p style="font-size: 0.875rem; line-height: 1.25rem; color: #6b7280">Skor Kamu</p>
-                        <div style="margin-top: 0.5rem; display: flex; align-items: center; justify-content: center;">
-                            <div style="position: relative; width: 100%; max-width: 20rem;">
-                                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                                    <span style="font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; color: #111827">
-                                        {{ $score }} / {{ $maxScore ?? '100' }} ({{ round(($score / ($maxScore ?? 100)) * 100) }}%)
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <p style="margin-top: 0.5rem; font-size: 1.25rem; line-height: 1.75rem; color: #111827; font-weight: 600;">
+                        Nilai Anda: <span x-text="score"></span>/100
+                    </p>
+                    <p style="margin-top: 0.5rem; font-size: 1rem; line-height: 1.5rem; color: #6b7280;">
+                        Nilai minimal kelulusan: <span x-text="minScore"></span>/100
+                    </p>
                 </div>
             </div>
 
             <div style="background-color: #f9fafb; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                <button
-                    type="button"
-                    @click="open = false; $wire.set('data', [])"
-                    style="margin-top: 0.75rem; width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid #d1d5db; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: white; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: #374151;"
-                >
-                    {{ $passed ? 'Ulangi Quiz' : 'Coba Lagi' }}
-                </button>
+                <template x-if="!passed">
+                    <button
+                        type="button"
+                        @click="open = false; $wire.set('data', [])"
+                        style="margin-top: 0.75rem; width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid #d1d5db; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: white; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: #374151;"
+                    >
+                        Kerjakan Ulang
+                    </button>
+                </template>
 
-                @if($passed)
-                    @if($hasNextPost)
-                        <a
-                            href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', ['record' => $record->slug, 'post' => $this->getNextPost()?->slug]) }}"
-                            style="width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid transparent; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: #059669; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: white;"
-                        >
-                            Lanjut ke Materi Berikutnya
-                        </a>
-                    @else
-                        <a
-                            href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('view', ['record' => $record->slug]) }}"
-                            style="width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid transparent; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: #059669; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: white;"
-                        >
-                            Selesaikan Modul
-                        </a>
-                    @endif
-                @endif
+                <a
+                    href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('view', ['record' => $record->slug]) }}"
+                    style="width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid #d1d5db; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: white; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: #374151; text-decoration: none;"
+                >
+                    Kembali ke Daftar Materi
+                </a>
+
+                <template x-if="passed">
+                    <a
+                        href="{{ $nextPost ? $this->getPostUrl($nextPost) : \App\Filament\Cohort\Resources\MyBatchResource::getUrl('view', ['record' => $record->slug]) }}"
+                        style="width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid transparent; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: #059669; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: white; text-decoration: none;"
+                    >
+                        {{ $nextPost ? 'Selanjutnya' : 'Selesai' }}
+                    </a>
+                </template>
             </div>
         </div>
     </div>

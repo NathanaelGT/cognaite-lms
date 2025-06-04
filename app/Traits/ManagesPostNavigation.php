@@ -15,11 +15,13 @@ trait ManagesPostNavigation
     public Batch $record;
     public Post $post;
     public $progressPercentage;
+    public ?Post $nextPost = null;
 
     protected function commonMount(Batch $record, Post $post): void
     {
         $this->record = $record;
         $this->post = $post;
+        $this->nextPost = $this->getNextPost();
 
         $totalPosts = $record->posts()->count();
         $completedPosts = auth()->user()->postProgress()

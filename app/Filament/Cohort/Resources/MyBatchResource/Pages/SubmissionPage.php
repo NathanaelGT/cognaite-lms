@@ -34,6 +34,9 @@ class SubmissionPage extends Page implements HasForms
     public ?array $data = [];
     public $hasSubmitted = false;
     public $submissionStatus = null;
+    public $submissionScore = null;
+    public $isPassed = false;
+    public $showResultModal = false;
 
     public function mount(Batch $record, Post $post): void
     {
@@ -47,6 +50,9 @@ class SubmissionPage extends Page implements HasForms
         if ($submission) {
             $this->hasSubmitted = true;
             $this->submissionStatus = $submission->status;
+            $this->submissionScore = $submission->score;
+            $this->isPassed = !is_null($submission->score) && $submission->score >= $this->post->min_score;
+            $this->showResultModal = !is_null($submission->score);
             $this->data = [
                 'file_path' => $submission->file_path,
                 'notes' => $submission->notes,
@@ -130,6 +136,7 @@ class SubmissionPage extends Page implements HasForms
             [
                 'file_path' => $data['file_path'],
                 'notes' => $data['notes'] ?? null,
+                'score' => null,
             ]
         );
 
@@ -145,5 +152,17 @@ class SubmissionPage extends Page implements HasForms
         );
 
         $this->dispatch('submission-success');
+    }
+
+    public function resubmit(): void
+    {
+        $this->showResultModal = false;
+        $this->hasSubmitted = false;
+        $this->submissionScore = null;
+        $this->isPassed = false;
+        $this->data = [
+            'file_path' => null,
+            'notes' => null,
+        ];
     }
 }
