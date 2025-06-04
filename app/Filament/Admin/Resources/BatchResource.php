@@ -3,6 +3,8 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\BatchResource\Pages;
+use App\Filament\Admin\Resources\BatchResource\Pages\Assessment;
+use App\Filament\Admin\Resources\BatchResource\RelationManagers\PostsRelationManager;
 use App\Models\Batch;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -150,6 +152,7 @@ class BatchResource extends Resource
             'create' => Pages\CreateBatch::route('/create'),
             'edit' => Pages\EditBatch::route('/{record}/edit'),
             'view' => Pages\ViewBatch::route('/{record}'),
+            'assessment' => Pages\Assessment::route('/{record}/{assessment}'),
         ];
     }
 }

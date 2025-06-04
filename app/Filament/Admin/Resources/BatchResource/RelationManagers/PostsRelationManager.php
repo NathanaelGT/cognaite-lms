@@ -2,7 +2,9 @@
 
 namespace App\Filament\Admin\Resources\BatchResource\RelationManagers;
 
+use App\Filament\Admin\Resources\BatchResource;
 use App\Filament\Admin\Resources\BatchResource\Pages\ViewBatch;
+use App\Filament\Admin\Resources\BatchResource\Pages\EditBatch;
 use App\Models\Post;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,6 +13,10 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class PostsRelationManager extends RelationManager
 {
@@ -128,7 +134,8 @@ class PostsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('order')
                     ->label('Urutan')
-                    ->sortable(),
+                    ->sortable()
+                    ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === ViewBatch::class),
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
@@ -182,7 +189,7 @@ class PostsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->after(function (Post $record, array $data) {
                         if ($record->type === 'quiz') {
 
@@ -194,13 +201,26 @@ class PostsRelationManager extends RelationManager
                                 $question->answers()->createMany($answers);
                             }
                         }
-                    }),
-                Tables\Actions\DeleteAction::make(),
+                    })
+                    ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === ViewBatch::class),
+                DeleteAction::make()
+                    ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === ViewBatch::class),
+                Action::make('assessment')
+                    ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === EditBatch::class)
+                    ->label('Penilaian')
+                    ->icon('heroicon-m-pencil-square')
+                    ->url(fn ($record): string => BatchResource::getUrl('assessment', [$this->ownerRecord, $record]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === ViewBatch::class),
                 ]),
             ]);
+    }
+
+    public function isReadOnly(): bool
+    {
+        return false;
     }
 }
