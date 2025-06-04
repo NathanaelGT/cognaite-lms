@@ -209,7 +209,7 @@ class PostsRelationManager extends RelationManager
                     ->hidden(fn(PostsRelationManager $livewire) => $livewire->pageClass === EditBatch::class)
                     ->label('Penilaian')
                     ->icon('heroicon-m-pencil-square')
-                    ->url(fn ($record): string => BatchResource::getUrl('assessment', [$this->ownerRecord, $record]))
+                    ->url(fn ($record): string => BatchResource::getUrl('assessment', [$this->ownerRecord, $record->id]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

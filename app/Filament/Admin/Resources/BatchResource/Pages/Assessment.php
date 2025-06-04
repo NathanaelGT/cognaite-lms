@@ -20,6 +20,8 @@ class Assessment extends ListRecords
 {
     protected static string $resource = BatchResource::class;
 
+    public ?int $assessment = null;
+
     public function getTitle(): string
     {
         return 'Penilaian';
@@ -31,7 +33,7 @@ class Assessment extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->query(Submission::query())
+            ->query(fn () => Submission::query()->where('post_id', $this->assessment))
             ->columns([
                 TextColumn::make('user.name')
                 ->label('Nama User')
