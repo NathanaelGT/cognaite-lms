@@ -22,6 +22,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ManagesPostNavigation;
+use Spatie\Activitylog\Models\Activity as ActivityLog;
 
 class SubmissionPage extends Page implements HasForms
 {
@@ -127,11 +128,14 @@ class SubmissionPage extends Page implements HasForms
     public function submit(): void
     {
         $data = $this->form->getState();
+        $user = Auth::user();
 
-        Submission::updateOrCreate(
+        $fileName = basename($data['file_path']);
+
+        $submission = Submission::updateOrCreate(
             [
                 'post_id' => $this->post->id,
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
             ],
             [
                 'file_path' => $data['file_path'],
@@ -139,6 +143,15 @@ class SubmissionPage extends Page implements HasForms
                 'score' => null,
             ]
         );
+
+        activity('submission')
+            ->causedBy($user)
+            ->performedOn($submission)
+            ->withProperties([
+                'file_name' => $fileName,
+                'post_name' => $this->post->title,
+            ])
+            ->log('Mengirim file submission');
 
         UserPostProgress::updateOrCreate(
             [
@@ -164,5 +177,30 @@ class SubmissionPage extends Page implements HasForms
             'file_path' => null,
             'notes' => null,
         ];
+    }
+
+    public function completeBatchFromModal(): void
+    {
+        $user = Auth::user();
+        $batchName = $this->record->name;
+
+        $existingLog = ActivityLog::where('log_name', 'batch')
+            ->where('description', 'Menyelesaikan batch')
+            ->where('causer_id', $user->id)
+            ->whereJsonContains('properties->batch_name', $batchName)
+            ->first();
+
+        if (!$existingLog) {
+            activity('batch')
+                ->causedBy($user)
+                ->withProperties([
+                    'batch_name' => $batchName,
+                ])
+                ->log('Menyelesaikan batch');
+        }
+
+        redirect()->to(MyBatchResource::getUrl('view', [
+            'record' => $this->record->slug,
+        ]));
     }
 }

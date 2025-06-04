@@ -19,6 +19,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ManagesPostNavigation;
+use Spatie\Activitylog\Models\Activity as ActivityLog;
 
 class Quiz extends Page
 {
@@ -142,13 +143,22 @@ class Quiz extends Page
         $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
         $passed = $score >= $this->post->min_score;
 
-        QuizResult::create([
+        $quizResult = QuizResult::create([
             'user_id' => Auth::id(),
             'post_id' => $this->post->id,
             'score' => $score,
             'passed' => $passed,
             'answers' => $formattedAnswers,
         ]);
+
+        activity('quiz')
+            ->causedBy(Auth::user())
+            ->performedOn($quizResult)
+            ->withProperties([
+                'score' => $score,
+                'quiz_name' => $this->post->title,
+            ])
+            ->log('Menyelesaikan quiz');
 
         $this->score = $score;
         $minScore = $this->post->min_score ?? 0;
@@ -221,5 +231,30 @@ class Quiz extends Page
             'hasNextPost' => (bool) $this->getNextPost(),
             'maxScore' => $this->maxScore,
         ];
+    }
+
+    public function completeBatchFromModal(): void
+    {
+        $user = Auth::user();
+        $batchName = $this->record->name;
+
+        $existingLog = ActivityLog::where('log_name', 'batch')
+            ->where('description', 'Menyelesaikan batch')
+            ->where('causer_id', $user->id)
+            ->whereJsonContains('properties->batch_name', $batchName)
+            ->first();
+
+        if (!$existingLog) {
+            activity('batch')
+                ->causedBy($user)
+                ->withProperties([
+                    'batch_name' => $batchName,
+                ])
+                ->log('Menyelesaikan batch');
+        }
+
+        redirect()->to(MyBatchResource::getUrl('view', [
+            'record' => $this->record->slug,
+        ]));
     }
 }

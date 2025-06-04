@@ -37,7 +37,24 @@ class ActivityResource extends Resource
 
                         if ($state === 'Join batch') {
                             $batchName = $record->subject?->name;
-                            return $batchName ? "Join batch $batchName" : 'Join batch';
+                            return "Join batch '{$batchName}'";
+                        }
+
+                        if ($state === 'Mengirim file submission') {
+                            $fileName = $record->properties->get('file_name');
+                            $postName = $record->properties->get('post_name');
+                            return "Mengirim {$fileName} untuk submission '{$postName}'";
+                        }
+
+                        if ($state === 'Menyelesaikan quiz') {
+                            $score = $record->properties->get('score');
+                            $quizName = $record->properties->get('quiz_name');
+                            return "Menyelesaikan quiz '{$quizName}' dengan nilai {$score}";
+                        }
+
+                        if ($state === 'Menyelesaikan batch') {
+                            $batchName = $record->properties->get('batch_name');
+                            return "Menyelesaikan batch '{$batchName}'";
                         }
 
                         return $state;

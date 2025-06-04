@@ -118,9 +118,18 @@ trait ManagesPostNavigation
             InfolistAction::make('finish')
                 ->label('Selesai')
                 ->icon('heroicon-o-check')
-                ->url(MyBatchResource::getUrl('view', [
-                    'record' => $this->record->slug,
-                ]))
+                ->action(function () {
+                    activity('batch')
+                        ->causedBy(Auth::user())
+                        ->withProperties([
+                            'batch_name' => $this->record->name,
+                        ])
+                        ->log('Menyelesaikan batch');
+
+                    return redirect()->to(MyBatchResource::getUrl('view', [
+                        'record' => $this->record->slug,
+                    ]));
+                })
                 ->color('success')
                 ->visible(fn () => !$this->getNextPost()),
         ];
@@ -166,9 +175,18 @@ trait ManagesPostNavigation
             FormAction::make('finish')
                 ->label('Selesai')
                 ->icon('heroicon-o-check')
-                ->url(MyBatchResource::getUrl('view', [
-                    'record' => $this->record->slug,
-                ]))
+                ->action(function () {
+                    activity('batch')
+                        ->causedBy(Auth::user())
+                        ->withProperties([
+                            'batch_name' => $this->record->name,
+                        ])
+                        ->log('Menyelesaikan batch');
+
+                    return redirect()->to(MyBatchResource::getUrl('view', [
+                        'record' => $this->record->slug,
+                    ]));
+                })
                 ->color('success')
                 ->visible(fn () => !$this->getNextPost()),
         ];
