@@ -51,7 +51,6 @@ class CohortPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Cohort/Widgets'), for: 'App\\Filament\\Cohort\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
