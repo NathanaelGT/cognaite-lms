@@ -119,6 +119,17 @@ trait ManagesPostNavigation
                 ->label('Selesai')
                 ->icon('heroicon-o-check')
                 ->action(function () {
+                    UserPostProgress::updateOrCreate(
+                        [
+                            'user_id' => Auth::id(),
+                            'post_id' => $this->post->id,
+                        ],
+                        [
+                            'is_completed' => true,
+                            'is_passed' => true,
+                        ]
+                    );
+
                     activity('batch')
                         ->causedBy(Auth::user())
                         ->withProperties([
