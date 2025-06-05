@@ -2,6 +2,8 @@
 
 namespace App\Filament\Cohort\Resources\MyBatchResource\Pages;
 
+use App\Enums\TransactionStatus;
+use App\Filament\Cohort\Resources\BatchResource;
 use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\Batch;
 use App\Models\Post;
@@ -12,6 +14,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontWeight;
 use App\Traits\ManagesPostNavigation;
+use Illuminate\Support\Facades\Auth;
 
 class LearnMaterial extends Page
 {
@@ -22,6 +25,17 @@ class LearnMaterial extends Page
 
     public function mount(Batch $record, Post $post): void
     {
+        if ($record->price > 0) {
+            $isPaid = $record->transactions()
+                ->where('user_id', Auth::id())
+                ->where('status', TransactionStatus::Paid)
+                ->exists();
+
+            if (!$isPaid) {
+                $this->redirect(BatchResource::getUrl('view', [$record]));
+            }
+        }
+
         $this->commonMount($record, $post);
     }
 
