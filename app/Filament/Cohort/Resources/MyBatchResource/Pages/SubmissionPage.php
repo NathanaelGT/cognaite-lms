@@ -199,8 +199,12 @@ class SubmissionPage extends Page implements HasForms
                 ->log('Menyelesaikan batch');
         }
 
-        redirect()->to(MyBatchResource::getUrl('view', [
-            'record' => $this->record->slug,
-        ]));
+        if ($nextPost = $this->getNextPost()) {
+            $this->redirect($this->getPostUrl($nextPost));
+        } else {
+            $this->redirect(MyBatchResource::getUrl('view', [
+                'record' => $this->record->slug,
+            ]));
+        }
     }
 }
