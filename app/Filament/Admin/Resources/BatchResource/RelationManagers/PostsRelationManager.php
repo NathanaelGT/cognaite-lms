@@ -55,7 +55,7 @@ class PostsRelationManager extends RelationManager
                             Forms\Components\TextInput::make('min_score')
                                 ->columnSpanFull()
                                 ->label('Nilai Minimum')
-                                ->placeholder('Masukkan Nilai Minimum')
+                                ->placeholder('Masukkan Nilai Minimum (0-100)')
                                 ->numeric()
                                 ->visible(fn (Get $get) => in_array($get('type'), ['submission', 'quiz']))
                                 ->required()

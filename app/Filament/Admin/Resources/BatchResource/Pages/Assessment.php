@@ -92,6 +92,9 @@ class Assessment extends ListRecords
                                 \Filament\Forms\Components\TextInput::make('score')
                                     ->label('Nilai')
                                     ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->placeholder('Masukkan Nilai (0-100)')
                                     ->required(),
                             ]),
                     ])
