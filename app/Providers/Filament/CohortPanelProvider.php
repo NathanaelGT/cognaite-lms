@@ -46,7 +46,7 @@ class CohortPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Cohort/Resources'), for: 'App\\Filament\\Cohort\\Resources')
             ->discoverPages(in: app_path('Filament/Cohort/Pages'), for: 'App\\Filament\\Cohort\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Cohort\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Cohort/Widgets'), for: 'App\\Filament\\Cohort\\Widgets')
             ->widgets([
