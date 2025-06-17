@@ -24,21 +24,17 @@ class Dashboard extends Page
     {
         $user = Auth::user();
 
-        // Batch yang masih dikerjakan (progress < 100%)
-        $this->ongoingBatches = Batch::whereHas('users', fn ($q) => $q->where('user_id', $user->id))
-            ->with(['posts', 'users' => fn($q) => $q->where('user_id', $user->id)])
-            ->get()
-            ->filter(fn($batch) => $batch->progress_percentage < 100)
-            ->sortByDesc('progress_percentage')
-            ->take(10); // Limit 10
+        $batches = Batch::whereHas('users', fn ($q) => $q->where('user_id', $user->id))
+            ->with('posts')
+            ->get();
 
-        // Batch yang sudah selesai (progress 100%)
-        $this->completedBatches = Batch::whereHas('users', fn ($q) => $q->where('user_id', $user->id))
-            ->with(['posts', 'users' => fn($q) => $q->where('user_id', $user->id)])
-            ->get()
-            ->filter(fn($batch) => $batch->progress_percentage == 100)
+        $this->ongoingBatches = $batches->filter(fn ($batch) => $batch->progress_percentage < 100)
+            ->sortByDesc('progress_percentage')
+            ->take(10);
+
+        $this->completedBatches = $batches->filter(fn ($batch) => $batch->progress_percentage == 100)
             ->sortByDesc('updated_at')
-            ->take(6); // Limit 6
+            ->take(6);
 
         $this->hasOngoingBatches = $this->ongoingBatches->isNotEmpty();
         $this->hasCompletedBatches = $this->completedBatches->isNotEmpty();
