@@ -134,7 +134,7 @@
                 <template x-if="isGraded && isPassed">
                     <button
                         type="button"
-                        wire:click.prevent="completeBatchFromModal"
+                        {{ $nextPost ? "onclick=window.location.href='" . $this->getPostUrl($nextPost) . "'" : 'wire:click.prevent=completeBatchFromModal' }}
                         style="width: 100%; display: inline-flex; justify-content: center; border-radius: 0.375rem; border: 1px solid transparent; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 0.5rem 1rem; background-color: #059669; font-size: 1rem; line-height: 1.5rem; font-weight: 500; color: white; text-decoration: none;"
                     >
                         {{ $nextPost ? 'Selanjutnya' : 'Selesai' }}
