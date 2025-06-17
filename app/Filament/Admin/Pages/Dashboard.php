@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
+use App\Enums\TransactionStatus;
 use App\Models\Batch;
 use App\Models\Transaction;
 use App\Models\User;
@@ -42,7 +43,7 @@ class Dashboard extends Page
 
         $period = CarbonPeriod::create($startDate, $endDate);
         $dates = collect($period)->map(fn($d) => $d->format('Y-m-d'))->toArray();
-        $rawSales = Transaction::where('status', 'SUCCESS')
+        $rawSales = Transaction::where('status', TransactionStatus::Paid->value)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('DATE(created_at) as date, SUM(price) as total')
             ->groupBy('date')
