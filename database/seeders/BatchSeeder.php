@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Answer;
 use App\Models\Batch;
 use App\Models\Post;
+use App\Models\Question;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
@@ -11,8 +13,9 @@ use Illuminate\Support\Facades\Storage;
 class BatchSeeder extends Seeder
 {
     protected array $batches = [];
-
     protected array $posts = [];
+    protected array $questions = [];
+    protected array $answers = [];
 
     public function run(): void
     {
@@ -865,7 +868,17 @@ class BatchSeeder extends Seeder
                 $this->post(
                     title: 'Pengenalan DevOps',
                     description: '<p>Konsep DevOps, tujuan, dan praktik kolaborasi antara tim pengembang dan operasi.</p>',
-                    content: '<p>DevOps menggabungkan praktik dan alat yang meningkatkan kemampuan organisasi dalam menyediakan layanan dan aplikasi dengan kecepatan tinggi. Fokus utamanya adalah kolaborasi antara tim developer dan tim operasi.</p>',
+                    content:
+                    '<div><p><strong>DevOps</strong> adalah gabungan dari <em>Development</em> dan <em>Operations</em>, yang merupakan pendekatan kolaboratif untuk pengembangan perangkat lunak modern.</p>
+                    <p>Tujuannya adalah mempercepat siklus hidup pengembangan perangkat lunak melalui kolaborasi lintas tim, otomatisasi, dan pengukuran performa. DevOps mempercepat rilis, meningkatkan stabilitas sistem, dan memperkuat kerjasama tim.</p>
+                    <h3>Prinsip DevOps</h3>
+                    <ul>
+                        <li><strong>Kolaborasi lintas tim</strong></li>
+                        <li><strong>Otomatisasi proses build dan deploy</strong></li>
+                        <li><strong>Monitoring berkelanjutan</strong></li>
+                        <li><strong>Feedback cepat</strong></li>
+                    </ul>
+                    <p>Dengan DevOps, pengiriman fitur, perbaikan bug, dan pembaruan menjadi lebih cepat dan efisien.</p></div>',
                     min_score: null,
                     type: 'material'
                 ),
@@ -873,49 +886,144 @@ class BatchSeeder extends Seeder
                 $this->post(
                     title: 'Continuous Integration (CI)',
                     description: '<p>Pengenalan CI dan cara mengintegrasikan kode secara otomatis setiap saat ada perubahan.</p>',
-                    content: '<p>Continuous Integration adalah praktik mengintegrasikan perubahan kode ke repositori utama secara berkala. Hal ini dilakukan untuk mendeteksi kesalahan lebih awal dan mempercepat proses pengembangan.</p>',
+                    content:
+                    '<div><p><strong>Continuous Integration (CI)</strong> adalah praktik mengintegrasikan perubahan kode ke repositori secara sering, biasanya beberapa kali sehari.</p>
+                    <p>Tujuannya adalah untuk mendeteksi kesalahan sejak dini melalui pengujian otomatis yang berjalan setiap kali ada perubahan.</p>
+                    <h3>Langkah dalam CI</h3>
+                    <ul>
+                        <li>Push kode ke <em>main branch</em></li>
+                        <li>CI tool menjalankan build dan test</li>
+                        <li>Developer diberi notifikasi jika ada kegagalan</li>
+                    </ul>
+                    <p>Beberapa alat populer untuk CI antara lain: GitHub Actions, Jenkins, dan GitLab CI.</p></div>',
                     min_score: null,
                     type: 'material'
+                ),
+
+                $this->post(
+                    title: 'Kuis Dasar DevOps',
+                    description: '<p>Uji pemahaman dasar tentang DevOps dan Continuous Integration.</p>',
+                    content: '<p>Kuis ini bertujuan untuk mengukur pemahaman Anda tentang konsep dasar DevOps, prinsip kolaborasi antara tim developer dan tim operasi, serta praktik CI yang umum dilakukan.</p>',
+                    min_score: 80,
+                    type: 'quiz',
+                    questions: [
+                        $this->question('Apa kepanjangan dari CI?', [
+                            ['Continuous Integration', true],
+                            ['Code Injection', false],
+                            ['Central Interface', false],
+                            ['Content Indexing', false],
+                        ]),
+                        $this->question('Apa tujuan utama dari DevOps?', [
+                            ['Memisahkan tim developer dan tim operasi', false],
+                            ['Meningkatkan kolaborasi dan kecepatan rilis perangkat lunak', true],
+                            ['Mengurangi biaya perangkat keras', false],
+                            ['Mengganti semua proses manual', false],
+                        ]),
+                        $this->question('DevOps menggabungkan prinsip dari...', [
+                            ['Desain grafis dan UI', false],
+                            ['Manajemen proyek dan akuntansi', false],
+                            ['Pengembangan perangkat lunak dan operasi sistem', true],
+                            ['Analisis data dan pemasaran', false],
+                        ]),
+                        $this->question('Continuous Integration dilakukan untuk...', [
+                            ['Menghindari penggunaan Git', false],
+                            ['Memastikan integrasi kode secara berkala dan otomatis', true],
+                            ['Mengganti pengujian manual', false],
+                            ['Menunda rilis produk', false],
+                        ]),
+                        $this->question('Salah satu manfaat utama DevOps adalah...', [
+                            ['Meningkatkan waktu tunggu deployment', false],
+                            ['Mempercepat rilis dan meningkatkan stabilitas sistem', true],
+                            ['Mengurangi komunikasi tim', false],
+                            ['Menghapus kebutuhan dokumentasi', false],
+                        ])
+                    ]
                 ),
 
                 $this->post(
                     title: 'Tugas Setup GitHub Actions untuk CI',
                     description: '<p>Peserta menyiapkan GitHub Actions untuk menjalankan tes otomatis setiap commit.</p>',
-                    content: '<p>Gunakan GitHub Actions untuk membuat workflow yang akan menjalankan script testing saat ada commit ke branch tertentu. Pastikan file <code>.github/workflows/ci.yml</code> sudah dikonfigurasi dengan benar.</p>',
+                    content:
+                    '<div><h3>Instruksi</h3>
+                    <ol>
+                        <li>Buat file <code>.github/workflows/ci.yml</code></li>
+                        <li>Konfigurasikan untuk menjalankan <code>npm test</code> atau <code>phpunit</code></li>
+                        <li>Pastikan workflow berjalan di branch <code>main</code></li>
+                    </ol></div>',
                     min_score: 85,
                     type: 'submission'
-                ),
-
-                $this->post(
-                    title: 'Continuous Deployment (CD)',
-                    description: '<p>Konsep otomatisasi *deploy* aplikasi ke *server* produksi atau staging.</p>',
-                    content: '<p>CD memungkinkan pengiriman aplikasi ke server secara otomatis setelah lolos pengujian. Ini meminimalisir intervensi manual dan mempercepat siklus rilis perangkat lunak.</p>',
-                    min_score: null,
-                    type: 'material'
                 ),
 
                 $this->post(
                     title: 'Docker dan Containerization',
                     description: '<p>Penggunaan Docker untuk membungkus aplikasi agar bisa dijalankan di berbagai lingkungan.</p>',
-                    content: '<p>Docker memungkinkan aplikasi dan dependensinya dibungkus dalam satu kontainer. Ini memastikan konsistensi lintas lingkungan dan mempermudah deployment.</p>',
+                    content:
+                    '<div><p><strong>Docker</strong> adalah platform containerization yang memungkinkan aplikasi dijalankan dalam lingkungan yang konsisten di berbagai sistem.</p>
+                    <h3>Manfaat Docker</h3>
+                    <ul>
+                        <li>Portabilitas antar lingkungan (dev, staging, production)</li>
+                        <li>Konsistensi dependency</li>
+                        <li>Mengurangi konflik versi software</li>
+                    </ul>
+                    <p>Docker menggunakan file <code>Dockerfile</code> untuk mendefinisikan bagaimana aplikasi dikemas, dan image akan dijalankan sebagai container.</p></div>',
                     min_score: null,
                     type: 'material'
+                ),
+
+                $this->post(
+                    title: 'Kuis Docker Dasar',
+                    description: '<p>Uji pemahaman Anda mengenai konsep dasar Docker dan containerization.</p>',
+                    content: '<p>Kuis ini akan membantu Anda menguji pengetahuan seputar Docker, cara kerja container, serta bagaimana Docker digunakan dalam pengembangan dan deployment aplikasi modern.</p>',
+                    min_score: 80,
+                    type: 'quiz',
+                    questions: [
+                        $this->question('Docker adalah...', [
+                            ['Sebuah bahasa pemrograman', false],
+                            ['Platform untuk containerization', true],
+                            ['Alat untuk backup data', false],
+                            ['Plugin untuk browser', false],
+                        ]),
+                        $this->question('Apa itu container dalam konteks Docker?', [
+                            ['Sebuah virtual machine', false],
+                            ['Sebuah layanan cloud untuk backup', false],
+                            ['Lingkungan runtime yang ringan dan terisolasi', true],
+                            ['Sistem operasi khusus untuk development', false],
+                        ]),
+                        $this->question('File konfigurasi Docker disebut...', [
+                            ['docker.yml', false],
+                            ['Dockerfile', true],
+                            ['docker.json', false],
+                            ['container.txt', false],
+                        ]),
+                        $this->question('Perintah untuk membangun image dari Dockerfile adalah...', [
+                            ['docker create', false],
+                            ['docker init', false],
+                            ['docker build', true],
+                            ['docker push', false],
+                        ]),
+                        $this->question('Apa perbedaan utama antara container dan virtual machine?', [
+                            ['Container lebih berat dari VM', false],
+                            ['VM tidak bisa jalan di cloud', false],
+                            ['Container menggunakan kernel host dan lebih ringan', true],
+                            ['VM bisa dihapus otomatis, container tidak bisa', false],
+                        ]),
+                    ]
                 ),
 
                 $this->post(
                     title: 'Tugas Membuat Dockerfile untuk Aplikasi Web',
                     description: '<p>Peserta membuat Dockerfile untuk aplikasi Express atau Laravel.</p>',
-                    content: '<p>Buat file <code>Dockerfile</code> yang mendefinisikan environment aplikasi Anda. Gunakan base image yang sesuai, salin source code, instal dependensi, dan tentukan perintah untuk menjalankan aplikasi.</p>',
+                    content:
+                    '<div><p>Buat <code>Dockerfile</code> yang dapat digunakan untuk menjalankan aplikasi Laravel atau Express.</p>
+                    <h3>Kriteria:</h3>
+                    <ul>
+                        <li>Menggunakan base image resmi</li>
+                        <li>Menyalin source code ke container</li>
+                        <li>Menjalankan perintah instalasi dependency</li>
+                        <li>Menentukan perintah <code>CMD</code> atau <code>ENTRYPOINT</code> untuk menjalankan aplikasi</li>
+                    </ul></div>',
                     min_score: 85,
                     type: 'submission'
-                ),
-
-                $this->post(
-                    title: 'Monitoring dan Logging',
-                    description: '<p>Pentingnya pencatatan log dan pemantauan aplikasi untuk menjaga stabilitas sistem.</p>',
-                    content: '<p>Monitoring membantu tim mendeteksi dan menangani isu secara proaktif. Logging menyediakan informasi penting untuk analisis dan debugging saat terjadi error.</p>',
-                    min_score: null,
-                    type: 'material'
                 ),
 
                 $this->post(
@@ -930,6 +1038,8 @@ class BatchSeeder extends Seeder
 
         Batch::query()->insert($this->batches);
         Post::query()->insert($this->posts);
+        Question::query()->insert($this->questions);
+        Answer::query()->insert($this->answers);
     }
 
     protected function addBatch(string $name, int $price, int $duration, array $posts): void
@@ -973,6 +1083,30 @@ class BatchSeeder extends Seeder
             $post['created_at'] = (string) $timestamp;
             $post['updated_at'] = (string) $timestamp;
 
+            $postId = count($this->posts) + 1;
+            if ($post['type'] === 'quiz') {
+                foreach ($post['questions'] ?? [] as $q) {
+                    $questionId = count($this->questions) + 1;
+                    $this->questions[] = [
+                        'post_id' => $postId,
+                        'content' => $q['content'],
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ];
+
+                    foreach ($q['answers'] as $answer) {
+                        $this->answers[] = [
+                            'question_id' => $questionId,
+                            'content' => $answer[0],
+                            'is_correct' => $answer[1],
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp,
+                        ];
+                    }
+                }
+            }
+
+            unset($post['questions']);
             $this->posts[] = $post;
         }
 
@@ -982,8 +1116,23 @@ class BatchSeeder extends Seeder
         );
     }
 
-    protected function post(string $title, string $description, string $content, ?int $min_score, string $type): array
+    protected function post(string $title, string $description, string $content, ?int $min_score, string $type, array $questions = []): array
     {
-        return compact('title', 'description', 'content', 'min_score', 'type');
+        return [
+            'title' => $title,
+            'description' => $description,
+            'content' => $content,
+            'type' => $type,
+            'min_score' => $min_score,
+            'questions' => $questions,
+        ];
+    }
+
+    protected function question(string $content, array $answers): array
+    {
+        return [
+            'content' => $content,
+            'answers' => $answers,
+        ];
     }
 }
