@@ -9,30 +9,7 @@
     </div>
 
     <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <h3 class="text-sm text-gray-500 mb-4">Filter Rentang Tanggal</h3>
-        <div class="flex flex-col md:flex-row gap-4">
-            <x-filament::input
-                type="date"
-                wire:model.defer="start_date"
-                label="Tanggal Mulai"
-                x-data
-                x-on:change="$refs.end_date.min = $el.value"
-            />
-            <x-filament::input
-                x-ref="end_date"
-                type="date"
-                wire:model.defer="end_date"
-                label="Tanggal Selesai"
-                min="{{ $start_date }}"
-            />
-            <x-filament::button wire:click="applyFilters" color="primary">
-                Terapkan
-            </x-filament::button>
-        </div>
-    </div>
-
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <h3 class="text-sm text-gray-500 mb-4">Chart Penjualan Harian</h3>
+        <h3 class="text-sm text-gray-500 mb-4">Chart Penjualan Harian (7 Hari Terakhir)</h3>
         <canvas id="salesChart" height="100"></canvas>
     </div>
 

@@ -1,9 +1,9 @@
 <?php
-//Terimakasih Pak Jokowi
 namespace App\Filament\Admin\Resources\BatchResource\Pages;
 
 use App\Filament\Admin\Resources\BatchResource;
 use App\Filament\Admin\Resources\BatchResource\RelationManagers\PostsRelationManager;
+use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\UserPostProgress;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
@@ -15,17 +15,35 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Submission;
 use Filament\Tables\Actions\Action;
+use App\Models\Batch;
 
 class Assessment extends ListRecords
 {
     protected static string $resource = BatchResource::class;
 
+    public Batch $record;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('Kembali')
+                ->url(fn () => BatchResource::getUrl('view', [$this->record])),
+
+        ];
+    }
     public ?int $assessment = null;
 
     public function getTitle(): string
     {
         return 'Penilaian';
     }
+
+    public function getPostTitle(): string
+    {
+        return \App\Models\Post::find($this->assessment)?->title;
+    }
+
     public function getBreadcrumb(): string
     {
         return 'Penilaian';
@@ -33,6 +51,7 @@ class Assessment extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->heading($this->getPostTitle())
             ->query(fn () => Submission::query()->where('post_id', $this->assessment))
             ->columns([
                 TextColumn::make('user.name')
