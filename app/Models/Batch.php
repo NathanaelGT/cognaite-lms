@@ -70,4 +70,9 @@ class Batch extends Model
 
         return (int) round(($completedPosts / $totalPosts) * 100);
     }
+
+    public function forumThreads()
+    {
+        return $this->hasMany(ForumThread::class);
+    }
 }

@@ -118,4 +118,14 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
 
         return $totalPosts > 0 && $completedPosts >= $totalPosts;
     }
+
+    public function forumThreads()
+    {
+        return $this->hasMany(ForumThread::class);
+    }
+
+    public function forumReplies()
+    {
+        return $this->hasMany(ForumReply::class);
+    }
 }

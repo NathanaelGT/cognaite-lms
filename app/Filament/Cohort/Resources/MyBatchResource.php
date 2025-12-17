@@ -195,6 +195,9 @@ class MyBatchResource extends Resource
             'learn-material' => Pages\LearnMaterial::route('/{record}/materi/{post}'),
             'quiz' => Pages\Quiz::route('/{record}/quiz/{post}'),
             'submission' => Pages\SubmissionPage::route('/{record}/submission/{post}'),
+            'forum' => Pages\ForumList::route('/{record}/forum'),
+            'forum-create' => Pages\CreateThread::route('/{record}/forum/create'),
+            'show-thread' => Pages\ShowThread::route('/{record}/forum/{thread}'),
         ];
     }
 

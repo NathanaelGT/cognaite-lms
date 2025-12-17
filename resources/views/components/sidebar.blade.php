@@ -43,7 +43,7 @@
         x-show="open"
         x-cloak
         style="top: 4rem; left: 0; width: 20rem"
-        class="fixed h-full w-64 bg-white border-l border-gray-200 p-4 overflow-y-auto z-40"
+        class="fixed h-full w-64 bg-white border-l border-gray-200 z-40 flex flex-col"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="-translate-x-full"
         x-transition:enter-end="translate-x-0"
@@ -51,52 +51,55 @@
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="-translate-x-full"
     >
-        <h3 class="font-bold text-lg mb-2">Daftar Materi</h3>
-        <div style="width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 10px; margin-bottom: 0; margin-top: 1rem">
-            <div style="width: {{ $progressPercentage }}%; background-color: rgb(217, 119, 6); height: 100%; border-radius: 9999px;"></div>
-        </div>
-        <div style="font-size: 0.875rem; color: rgb(55, 65, 81); margin-bottom: 1rem;">
-            {{ $progressPercentage }}% selesai
-        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+            <h3 class="font-bold text-lg mb-2">Daftar Materi</h3>
 
-        @php
-            $previousPassed = true;
-        @endphp
+            <div style="width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 10px; margin-top: 1rem">
+                <div style="width: {{ $progressPercentage }}%; background-color: rgb(217, 119, 6); height: 100%; border-radius: 9999px;"></div>
+            </div>
 
-        @foreach ($record->posts()->orderBy('order')->get() as $item)
+            <div style="font-size: 0.875rem; color: rgb(55, 65, 81); margin-bottom: 1rem;">
+                {{ $progressPercentage }}% selesai
+            </div>
+
             @php
-                $isPassed = auth()->user()->postProgress->where('post_id', $item->id)->first()->is_passed ?? false;
-
-                $isAccessible = $previousPassed;
-
-                if (!$isPassed && $item->order >= $post->order) {
-                    $previousPassed = false;
-                }
-
-                $postUrl = match ($item->type) {
-                    'quiz' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('quiz', [
-                        'record' => $record->slug,
-                        'post' => $item->slug,
-                    ]),
-                    'submission' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('submission', [
-                        'record' => $record->slug,
-                        'post' => $item->slug,
-                    ]),
-                    default => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', [
-                        'record' => $record->slug,
-                        'post' => $item->slug,
-                    ]),
-                };
+                $previousPassed = true;
             @endphp
 
-            <div class="relative">
-                <a
-                    href="{{ $isAccessible ? $postUrl : '#' }}"
-                    @if(!$isAccessible)
-                        onclick="event.preventDefault();"
-                    title="Selesaikan materi sebelumnya terlebih dahulu"
-                    @endif
-                    style="
+            @foreach ($record->posts()->orderBy('order')->get() as $item)
+                @php
+                    $isPassed = auth()->user()->postProgress->where('post_id', $item->id)->first()->is_passed ?? false;
+
+                    $isAccessible = $previousPassed;
+
+                    if (!$isPassed && $item->order >= $post->order) {
+                        $previousPassed = false;
+                    }
+
+                    $postUrl = match ($item->type) {
+                        'quiz' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('quiz', [
+                            'record' => $record->slug,
+                            'post' => $item->slug,
+                        ]),
+                        'submission' => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('submission', [
+                            'record' => $record->slug,
+                            'post' => $item->slug,
+                        ]),
+                        default => \App\Filament\Cohort\Resources\MyBatchResource::getUrl('learn-material', [
+                            'record' => $record->slug,
+                            'post' => $item->slug,
+                        ]),
+                    };
+                @endphp
+
+                <div class="relative">
+                    <a
+                        href="{{ $isAccessible ? $postUrl : '#' }}"
+                        @if(!$isAccessible)
+                            onclick="event.preventDefault();"
+                        title="Selesaikan materi sebelumnya terlebih dahulu"
+                        @endif
+                        style="
                     display: block;
                     width: 100%;
                     text-align: left;
@@ -112,23 +115,61 @@
                     text-decoration: none;
                     cursor: {{ $isAccessible ? 'pointer' : 'not-allowed' }};
                 "
-                    @if($isAccessible)
-                        onmouseover="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(180 90 5)' : 'rgb(254 243 199)' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : 'rgb(180 90 5)' }}'"
-                    onmouseout="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(217 119 6)' : 'white' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : '#374151' }}'"
-                    @endif
-                >
-                    {{ $item->title }}
-                    @if(!$isAccessible)
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    @endif
-                </a>
+                        @if($isAccessible)
+                            onmouseover="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(180 90 5)' : 'rgb(254 243 199)' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : 'rgb(180 90 5)' }}'"
+                        onmouseout="this.style.backgroundColor='{{ $post->id === $item->id ? 'rgb(217 119 6)' : 'white' }}'; this.style.color='{{ $post->id === $item->id ? 'white' : '#374151' }}'"
+                        @endif
+                    >
+                        {{ $item->title }}
+                        @if(!$isAccessible)
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        @endif
+                    </a>
 
-                @if(!$isAccessible)
-                    <div class="absolute inset-0 bg-gray-100 opacity-50 rounded-md"></div>
-                @endif
-            </div>
-        @endforeach
+                    @if(!$isAccessible)
+                        <div class="absolute inset-0 bg-gray-100 opacity-50 rounded-md"></div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+
+        <div
+            class="sticky bottom-0"
+            style="
+                background-color: white;
+                border-top: 1px solid #e5e7eb;
+                padding: 0.75rem;
+                z-index: 10;
+            "
+        >
+            <a
+                href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('forum', ['record' => $record->slug]) }}"
+                style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            background-color: rgb(217 119 6);
+            color: white;
+            text-decoration: none;
+        "
+                onmouseover="this.style.backgroundColor='rgb(180 90 5)'"
+                onmouseout="this.style.backgroundColor='rgb(217 119 6)'"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.1rem; height: 1.1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M8 10h8m-8 4h5m-7 6l-4-4V4a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2H7z" />
+                </svg>
+
+                Forum Diskusi
+            </a>
+        </div>
     </div>
 </div>
