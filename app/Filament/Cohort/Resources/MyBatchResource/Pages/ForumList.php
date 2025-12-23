@@ -23,6 +23,10 @@ class ForumList extends Page
     public function mount(Batch $record): void
     {
         $this->record = $record;
+
+        if (request()->has('post')) {
+            $this->postId = (int) request()->query('post');
+        }
     }
 
     protected function getHeaderActions(): array
@@ -49,6 +53,10 @@ class ForumList extends Page
     {
         $query = ForumThread::query()
             ->where('batch_id', $this->record->id);
+
+        if ($this->postId) {
+            $query->where('post_id', $this->postId);
+        }
 
         if ($this->mode === 'mine') {
             $query->where('user_id', auth()->id());

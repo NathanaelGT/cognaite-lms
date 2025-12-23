@@ -145,7 +145,9 @@
             "
         >
             <a
-                href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('forum', ['record' => $record->slug]) }}"
+                href="{{ \App\Filament\Cohort\Resources\MyBatchResource::getUrl('forum', [
+                    'record' => $record->slug,
+                    ]) . '?post=' . $post->id }}"
                 style="
             display: flex;
             align-items: center;
