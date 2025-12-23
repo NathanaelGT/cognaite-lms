@@ -8,4 +8,6 @@
     {{ $this->infolist }}
 
     <x-sidebar :record="$record" :post="$post" :progressPercentage="$progressPercentage" />
+
+    <livewire:ai-chatbox :batch-id="$record->id" />
 </x-filament-panels::page>
