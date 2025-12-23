@@ -5,9 +5,9 @@
             Forum Diskusi Batch {{ $record->name }}
         </h2>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
 
-            {{-- FILTER --}}
+            {{-- KIRI: MODE FILTER --}}
             <div class="flex gap-2">
                 <button
                     wire:click="$set('mode', 'all')"
@@ -20,7 +20,7 @@
                 }}
             "
                 >
-                    Semua Diskusi
+                    Semua Pertanyaan
                 </button>
 
                 <button
@@ -38,7 +38,25 @@
                 </button>
             </div>
 
-            {{-- SORT --}}
+            {{-- TENGAH: FILTER TOPIK --}}
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500">Topik</span>
+
+                <select
+                    wire:model.live="postId"
+                    class="rounded-md border-gray-300 text-sm focus:border-orange-500 focus:ring-orange-500"
+                >
+                    <option value="">Semua</option>
+
+                    @foreach ($record->posts()->orderBy('order')->get() as $post)
+                        <option value="{{ $post->id }}">
+                            {{ $post->order }}. {{ $post->title }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- KANAN: SORT --}}
             <button
                 wire:click="$set('order', '{{ $order === 'latest' ? 'oldest' : 'latest' }}')"
                 class="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-800 transition"

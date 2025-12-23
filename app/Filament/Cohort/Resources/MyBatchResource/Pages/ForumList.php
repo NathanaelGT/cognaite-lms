@@ -18,6 +18,7 @@ class ForumList extends Page
 
     public string $mode = 'all';
     public string $order = 'latest';
+    public ?int $postId = null;
 
     public function mount(Batch $record): void
     {
@@ -46,11 +47,15 @@ class ForumList extends Page
 
     public function getThreads()
     {
-        $query = \App\Models\ForumThread::query()
+        $query = ForumThread::query()
             ->where('batch_id', $this->record->id);
 
         if ($this->mode === 'mine') {
             $query->where('user_id', auth()->id());
+        }
+
+        if ($this->postId) {
+            $query->where('post_id', $this->postId);
         }
 
         return $this->order === 'oldest'
