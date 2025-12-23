@@ -27,9 +27,10 @@ class CreateThread extends Page implements HasForms
 
     public ?array $data = [];
 
+    public bool $enabled = true;
+
     public function mount(Batch $record): void
     {
-
         $this->record = $record;
         $this->form->fill();
     }
@@ -68,6 +69,10 @@ class CreateThread extends Page implements HasForms
 
     public function submit(): void
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         ForumThread::create([
             'batch_id' => $this->record->id,
             'user_id' => Auth::id(),
@@ -75,6 +80,8 @@ class CreateThread extends Page implements HasForms
             'title' => $this->data['title'],
             'content' => $this->data['content'],
         ]);
+
+        $this->enabled = false;
 
         $this->redirect(
             MyBatchResource::getUrl('forum', [

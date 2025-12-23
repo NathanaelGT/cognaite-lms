@@ -15,7 +15,7 @@
 
             <div style="display: flex; justify-content: flex-end;">
                 <button
-                    type="submit"
+                    type="{{ $this->enabled ? 'submit' : 'button' }}"
                     wire:loading.attr="disabled"
                     style="
                         display: inline-flex;
