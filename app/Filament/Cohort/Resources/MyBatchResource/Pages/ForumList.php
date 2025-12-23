@@ -53,15 +53,17 @@ class ForumList extends Page
     {
         $user = auth()->user();
 
-        $query = ForumThread::where('batch_id', $this->record->id)
-            ->whereHas('post', function ($q) use ($user) {
-                $accessiblePostIds = $this->record->posts()
-                    ->get()
-                    ->filter(fn ($post) => $user->canAccessPost($post))
-                    ->pluck('id');
+        $accessiblePostIds = $this->record->posts()
+            ->get()
+            ->filter(fn ($post) => $user->canAccessPost($post))
+            ->pluck('id');
 
-                $q->whereIn('id', $accessiblePostIds);
-            });
+        $query = ForumThread::where('batch_id', $this->record->id)
+            ->whereIn('post_id', $accessiblePostIds);
+
+        if ($this->postId) {
+            $query->where('post_id', $this->postId);
+        }
 
         if ($this->mode === 'mine') {
             $query->where('user_id', $user->id);
