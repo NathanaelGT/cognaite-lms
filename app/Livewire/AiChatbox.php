@@ -28,7 +28,7 @@ class AiChatbox extends Component
         $encodedPrompt = json_encode($this->prompt);
 
         $this->currentPrompt = $this->prompt;
-        $this->answer = '';
+        $this->answer = ' ... ';
         $this->prompt = '';
 
         $this->js("\$wire.ask({$encodedPrompt})");
@@ -68,7 +68,9 @@ class AiChatbox extends Component
 
         $answer = '';
         Ollama::processStream($response->getBody(), function ($data) use (&$answer) {
-            $this->stream(to: 'answer', content: Str::markdown($answer .= $data['message']['content']), replace: true);
+            $this->stream(to: 'answer', content: $data['message']['content'], replace: $answer === '');
+
+            $answer .= $data['message']['content'];
         });
 
         AiChat::create([

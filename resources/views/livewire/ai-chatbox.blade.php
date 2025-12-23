@@ -145,9 +145,11 @@
                 "
             ></div>
 
-            <style>[wire\:stream="answer"]:empty{display:none}</style>
+            <div wire:stream="answer" style="display: none"></div>
+            <style>#output:empty{display:none}</style>
             <div
-                 wire:stream="answer"
+                 wire:ignore
+                 id="output"
                  style="
                     max-width: 70%;
                     background: #e4e6eb;
@@ -155,24 +157,35 @@
                     white-space: pre-wrap;
                     border-radius: 1.25rem 1.25rem 1.25rem 0.4rem;
                 "
-            >{!! $answer !!}</div>
+            ></div>
+            <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
             <script>
-                const target = document.querySelector('#chat')
+                const container = document.querySelector('#chat')
+                const input = document.querySelector('[wire\\:stream="answer"]')
+                const output = document.querySelector('#output')
 
-                new MutationObserver(() => {
-                    target.scrollTop = target.scrollHeight
-                }).observe(document.querySelector('[wire\\:stream="answer"]'), {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
+                const observer = new MutationObserver((mutations) => {
+                    for (const mutation of mutations) {
+                        if ((mutation.type === 'childList' || mutation.type === 'characterData') && input.innerHTML !== '') {
+                            output.innerHTML = marked.parse(input.innerHTML)
+                            container.scrollTop = container.scrollHeight
+                        }
+                    }
                 })
 
-                target.scrollTop = target.scrollHeight
+                observer.observe(input, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true,
+                })
+
+                container.scrollTop = container.scrollHeight
             </script>
         </div>
 
         <form
             wire:submit.prevent="submitPrompt"
+            wire:loading.attr="disabled"
             style="
                 padding: 0.75rem;
                 display: flex;
