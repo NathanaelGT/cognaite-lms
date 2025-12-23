@@ -51,8 +51,14 @@
                 >
                     <option value="">Semua</option>
 
-                    @foreach ($record->posts()->orderBy('order')->get() as $post)
-                        <option value="{{ $post->id }}">
+                    @foreach (
+                        $record->posts()
+                            ->get()
+                            ->filter(fn ($post) => auth()->user()->canAccessPost($post))
+                            ->sortBy('order')
+                            as $post
+                    )
+                    <option value="{{ $post->id }}">
                             {{ $post->order }}. {{ $post->title }}
                         </option>
                     @endforeach

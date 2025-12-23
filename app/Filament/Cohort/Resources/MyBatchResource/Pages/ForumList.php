@@ -51,19 +51,20 @@ class ForumList extends Page
 
     public function getThreads()
     {
-        $query = ForumThread::query()
-            ->where('batch_id', $this->record->id);
+        $user = auth()->user();
 
-        if ($this->postId) {
-            $query->where('post_id', $this->postId);
-        }
+        $query = ForumThread::where('batch_id', $this->record->id)
+            ->whereHas('post', function ($q) use ($user) {
+                $accessiblePostIds = $this->record->posts()
+                    ->get()
+                    ->filter(fn ($post) => $user->canAccessPost($post))
+                    ->pluck('id');
+
+                $q->whereIn('id', $accessiblePostIds);
+            });
 
         if ($this->mode === 'mine') {
-            $query->where('user_id', auth()->id());
-        }
-
-        if ($this->postId) {
-            $query->where('post_id', $this->postId);
+            $query->where('user_id', $user->id);
         }
 
         return $this->order === 'oldest'

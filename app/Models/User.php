@@ -66,6 +66,32 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Has
         return $this->hasVerifiedEmail();
     }
 
+    public function canAccessPost(\App\Models\Post $post): bool
+    {
+        $batch = $post->batch;
+
+        $previousPosts = $batch->posts()
+            ->where('order', '<', $post->order)
+            ->orderBy('order')
+            ->get();
+
+        foreach ($previousPosts as $prev) {
+            $progress = $this->postProgress
+                ->where('post_id', $prev->id)
+                ->first();
+
+            if (! $progress || ! $progress->is_completed) {
+                return false;
+            }
+
+            if (in_array($prev->type, ['quiz', 'submission']) && ! $progress->is_passed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function batches(): BelongsToMany
     {
         return $this->belongsToMany(Batch::class)->withTimestamps();

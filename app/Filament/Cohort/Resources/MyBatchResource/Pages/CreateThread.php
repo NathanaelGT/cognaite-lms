@@ -5,6 +5,7 @@ namespace App\Filament\Cohort\Resources\MyBatchResource\Pages;
 use App\Filament\Cohort\Resources\MyBatchResource;
 use App\Models\Batch;
 use App\Models\ForumThread;
+use Filament\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -45,13 +46,14 @@ class CreateThread extends Page implements HasForms
                 Select::make('post_id')
                     ->label('Topik Diskusi')
                     ->options(
-                    $this->record->posts()
-                        ->orderBy('order')
-                        ->get()
-                        ->mapWithKeys(fn ($post) => [
-                            $post->id => "{$post->order}. {$post->title} (" . ucfirst($post->type) . ")"
-                        ])
-                        ->toArray()
+                        $this->record->posts()
+                            ->get()
+                            ->filter(fn ($post) => auth()->user()->canAccessPost($post))
+                            ->sortBy('order')
+                            ->mapWithKeys(fn ($post) => [
+                                $post->id => "{$post->order}. {$post->title} (" . ucfirst($post->type) . ")"
+                            ])
+                            ->toArray()
                     )
                     ->required()
                     ->searchable(),
@@ -79,5 +81,19 @@ class CreateThread extends Page implements HasForms
                 'record' => $this->record->slug,
             ])
         );
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('back')
+                ->label('Kembali')
+                ->icon('heroicon-o-arrow-left')
+                ->url(
+                    MyBatchResource::getUrl('forum', [
+                        'record' => $this->record->slug,
+                    ])
+                ),
+        ];
     }
 }

@@ -22,6 +22,11 @@ class ShowThread extends Page
 
     public function mount(Batch $record, ForumThread $thread): void
     {
+        abort_unless(
+            auth()->user()->canAccessPost($thread->post),
+            403
+        );
+
         $this->record = $record;
         $this->thread = $thread;
     }
@@ -48,7 +53,7 @@ class ShowThread extends Page
     {
         return [
             Action::make('back')
-                ->label('Kembali ke Forum')
+                ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->url(
                     MyBatchResource::getUrl('forum', [
