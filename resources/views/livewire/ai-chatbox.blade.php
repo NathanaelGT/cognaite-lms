@@ -179,7 +179,9 @@
                     subtree: true,
                 })
 
-                container.scrollTop = container.scrollHeight
+                requestAnimationFrame(() => {
+                    container.scrollTop = container.scrollHeight
+                })
             </script>
         </div>
 
